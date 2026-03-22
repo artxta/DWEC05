@@ -98,13 +98,7 @@ class List {
     });
   }
   // metodos publicos
-
-  // obtener el Map, metodo protegido
-  // _getArray() {
-  //   return _listaPrivada.get(this);
-  // }
-
-  // 
+  // Se ha borrado un  metodo dentro de un comentario
 
   // añade un nuevo elemento a la lista, implementar para comprobar ISBN en demás clases
   add(valor) {

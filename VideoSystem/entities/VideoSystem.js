@@ -34,10 +34,20 @@ let VideoSystem = (function () {
   class VideoSystem {
     #name = "VideoSystem"; // nombre del sistema por defecto
     // iterators
+
+    #users = new Map(); //  Key: user.username, value: objeto User
+    #productions = new Map(); // Key: production.title, Value: objeto Production
+
+    // cambiar clave objeto por una string
+
+    // Key: category.name, 
+    // Value: objeto literal {obj: c, productions: new Set production, etc}
     #categories = new Map();
-    #users = new Map();
-    #productions = new Map();
+    // Key: objeto Actor, 
+    // Value: objeto literal {obj: a, productions: new Set(production1, etc)}
     #actors = new Map();
+    // Key: objeto Director, 
+    // Value: objeto literal {obj: d, productions: new Set(production1, etc)
     #directors = new Map();
 
     constructor() {
@@ -61,9 +71,9 @@ let VideoSystem = (function () {
         enumerable: true,
         // función generadora
         get: function* () {
-          for (const c of this.#categories.keys()) {
+          for (const c of this.#categories.values()) {
             // devolver uno por uno
-            yield c;
+            yield c.obj;
           }
         },
         set(_) {// el simbolo _ significa ignorado por convención
@@ -105,8 +115,8 @@ let VideoSystem = (function () {
         enumerable: true,
         get: function* () {
           // obtiene los actors
-          for (const v of this.#actors.keys()) {
-            yield v;
+          for (const v of this.#actors.values()) {
+            yield v.obj;
           }
         },
         set(_) {
@@ -120,8 +130,8 @@ let VideoSystem = (function () {
         get: function* () {
 
           // obtiene los directores
-          for (const d of this.#directors.keys()) {
-            yield d;
+          for (const d of this.#directors.values()) {
+            yield d.obj;
           }
         },
         set(_) {
@@ -140,13 +150,14 @@ let VideoSystem = (function () {
         if (!(c instanceof Category)) throw new WrongClass("Category", c.name);
 
         // Flyweight: reutilizar categoría existente si ya está en el Map
-        if (this.#categories.has(c)) {
-          // sustituye el parámetro con la existente
-          // categorias[i] = this.#categories.get(c.name);
-          throw new ObjetoYaExiste(c.name);
+        if (this.#categories.has(c.name)) {
+
+          throw new CategoryExist(c.name);
         } else {
           // si no existe la crea
-          this.#categories.set(c, new Set());
+          // se ha cambiado la clave por el nombre de la categoria
+          // se ha cambiado el valor por un objeto literal con la categoria y el Set 
+          this.#categories.set(c.name, { obj: c, productions: new Set() });
         }
       }
 
@@ -158,7 +169,11 @@ let VideoSystem = (function () {
     // sus productos pasan a la de por defecto.
     removeCategory(...categories) {
 
-      const destinoSet = this.#categories.get(categoryDefault);
+      // verificar que existe la categoria por defecto
+      if (!this.#categories.has(categoryDefault.name)) {
+        this.addCategory(categoryDefault);
+      }
+      const destinoSet = this.#categories.get(categoryDefault.name).productions;
 
       for (const c of categories) {
         // si no hay datos
@@ -170,9 +185,9 @@ let VideoSystem = (function () {
         if (!(c instanceof Category)) throw new WrongClass("Category", c.name);
 
         // si esa categoria existe
-        if (this.#categories.has(c)) {
+        if (this.#categories.has(c.name)) {
           // copiar las entradas productions a la de por defecto
-          const origenSet = this.#categories.get(c);
+          const origenSet = this.#categories.get(c.name).productions;
 
           // copiar las entradas a la de por defecto
           for (const i of origenSet) {
@@ -181,7 +196,9 @@ let VideoSystem = (function () {
 
 
           // borrar categoria
-          this.#categories.delete(c);
+          // si se borra una categoria tambien se borra todas las producciones que
+          // estén asignadas al Set dentro del Map #categories
+          this.#categories.delete(c.name);
 
         } else {
           throw new CategoryNoRegistrada(c.name);
@@ -245,7 +262,12 @@ let VideoSystem = (function () {
         if (!(c instanceof Production)) throw new WrongClass("Production", c);
         // si tiene el mismo titulo y fecha es la misma Production
         if (this.#productions.has(c.title)) {
-          throw new ObjetoYaExiste(c);
+          const titulo = this.#productions.get(c.title).title;
+          const fecha = this.#productions.get(c.title).publication.getTime();
+          if ((titulo === c.title) && fecha === c.publication.getTime()) {
+
+            throw new ObjetoYaExiste(c);
+          }
         }
 
         // añadir Production
@@ -253,6 +275,8 @@ let VideoSystem = (function () {
         this.#productions.set(c.title, c);
 
       }
+      // devolver el número de elementos
+      return this.#productions.size;
     }
 
     // removeProduction()
@@ -266,23 +290,32 @@ let VideoSystem = (function () {
         // borrar relaciones category, director, actor
         // 
         // recorrer categorias y si tiene esta production borrarla también
-        for (const [cat, setProduction] of this.#categories) {
-          if (setProduction.has(p)) {
-            this.deassignCategory(cat, p);
+
+        // Aquí abajo se borran las relaciones:
+        // Produccion - Category
+        // Produccion - Director
+        // Produccion - Actor
+        // Key: category.name, 
+        // Value: objeto literal {obj: a, productions: new Set(production1, etc)}
+
+        // recorrer categorias
+        for (const c of this.#categories.values()) {
+          if (c.productions.has(p)) {
+            this.deassignCategory(c.obj, p);
           }
         }
 
         // recorrer directores
-        for (const [dir, setProduction] of this.#directors) {
-          if (setProduction.has(p)) {
-            this.deassignDirector(dir, p);
+        for (const d of this.#directors.values()) {
+          if (d.productions.has(p)) {
+            this.deassignDirector(d.obj, p);
           }
         }
 
         // recorrer actores
-        for (const [act, setProduction] of this.#actors) {
-          if (setProduction.has(p)) {
-            this.deassignActor(act, p);
+        for (const a of this.#actors.values()) {
+          if (a.productions.has(p)) {
+            this.deassignActor(a.obj, p);
           }
         }
 
@@ -302,10 +335,10 @@ let VideoSystem = (function () {
         // comprobar entrada
         if ((a === null) || (a === undefined)) throw new EmptyValueException("actors");
         if (!(a instanceof Person)) throw new WrongClass("Person", a.name);
-        if (this.#actors.has(a)) throw new ObjetoYaExiste(a.name);
+        if (this.#actors.has(`${a.name}_${a.lastname1}`)) throw new ObjetoYaExiste(a.name);
 
         // añadir el actor
-        this.#actors.set(a, new Set());
+        this.#actors.set(`${a.name}_${a.lastname1}`, { obj: a, productions: new Set() });
       }
       return this.#actors.size;
     }
@@ -316,12 +349,16 @@ let VideoSystem = (function () {
         // comprobar entrada
         if ((a === null) || (a === undefined)) throw new EmptyValueException("actors");
         if (!(a instanceof Person)) throw new WrongClass("Person", a.name);
-        if (!this.#actors.has(a)) throw new ObjetoNoExiste(a.name);
+        if (!this.#actors.has(`${a.name}_${a.lastname1}`)) throw new ObjetoNoExiste(a.name);
 
         // eliminar relaciones
-        this.#actors.get(a).clear();
+        for (const production of this.#actors.get(`${a.name}_${a.lastname1}`).productions) {
+          // dessasignar producciones de ese actor
+          this.deassignActor(a, production);
+        }
+
         // elimina el actor
-        this.#actors.delete(a);
+        this.#actors.delete(`${a.name}_${a.lastname1}`);
       }
       // devuelve el número de actores
       return this.#actors.size;
@@ -335,10 +372,10 @@ let VideoSystem = (function () {
         // comprobar entrada
         if ((dir === null) || (dir === undefined)) throw new EmptyValueException("directors");
         if (!(dir instanceof Person)) throw new WrongClass("Person", dir.name);
-        if (this.#directors.has(dir)) throw new ObjetoYaExiste(dir.name || "no definido");
+        if (this.#directors.has(`${dir.name}_${dir.lastname1}`)) throw new ObjetoYaExiste(dir.name || "no definido");
 
         // añade el objeto
-        this.#directors.set(dir, new Set());
+        this.#directors.set(`${dir.name}_${dir.lastname1}`, { obj: dir, productions: new Set() });
       }
       // devolver número de directores
       return this.#directors.size;
@@ -350,12 +387,15 @@ let VideoSystem = (function () {
         // comprobar entrada
         if ((dir === null) || (dir === undefined)) throw new EmptyValueException("directors");
         if (!(dir instanceof Person)) throw new WrongClass("Person", dir.name);
-        if (!this.#directors.has(dir)) throw new ObjetoNoExiste(dir.name || "no definido");
+        if (!this.#directors.has(`${dir.name}_${dir.lastname1}`)) throw new ObjetoNoExiste(dir.name || "no definido");
 
         // borrar relaciones
-        this.#directors.get(dir).clear();
+        for (const production of this.#directors.get(`${dir.name}_${dir.lastname1}`).productions) {
+          // desassignar producciones de ese director
+          this.deassignDirector(dir, production);
+        }
         // borra el director
-        this.#directors.delete(dir);
+        this.#directors.delete(`${dir.name}_${dir.lastname1}`);
       }
       return this.#directors.size;
     }
@@ -368,12 +408,12 @@ let VideoSystem = (function () {
       if ((category === null) || (category === undefined)) throw new EmptyValueException("category");
       if (!(category instanceof Category)) throw new WrongClass("Category", category.name);
       // flyweight solo se crea si no existe
-      if (!(this.#categories.has(category))) {
+      if (!(this.#categories.has(category.name))) {
         this.addCategory(category);
       }
 
-      // obtejer categoria
-      const categoriaGuardar = this.#categories.get(category);
+      // obtener el Set dentro del Map de las categorias
+      const categoriaGuardar = this.#categories.get(category.name).productions;
       // recorrer el rest
       for (const pro of production) {
 
@@ -388,12 +428,14 @@ let VideoSystem = (function () {
         }
 
         // asignar las productions a la categoria
+        // guarda la produccion dentro del set de la categoria
+        // this.#categories.get(category.name).productions.add(productions)
         categoriaGuardar.add(pro);
 
       }
 
       // devolver el número de produccions asignadas a la categoria
-      return this.#categories.get(category).size;
+      return categoriaGuardar.size;
 
     }
 
@@ -403,10 +445,10 @@ let VideoSystem = (function () {
       // comprobar entrada
       if ((category === null) || (category === undefined)) throw new EmptyValueException("category");
       if (!(category instanceof Category)) throw new WrongClass("Category", category.name);
-      if (!this.#categories.has(category)) throw new CategoryNoRegistrada(category.name);
+      if (!this.#categories.has(category.name)) throw new CategoryNoRegistrada(category.name);
 
       // obtener categoria
-      const categoriaGuardar = this.#categories.get(category);
+      const categoriaGuardar = this.#categories.get(category.name).productions;
 
       // recorrer el rest
       for (const pro of productions) {
@@ -416,12 +458,13 @@ let VideoSystem = (function () {
         if (!(pro instanceof Production)) throw new WrongClass("Productions", pro.name);
 
         // si existe esa production desasignar
+        // this.#categories.get(category).productions.delete(pro);
         if (categoriaGuardar.has(pro)) {
           categoriaGuardar.delete(pro);
 
         }
       }
-      // devolver tamaño de esa categoria pasada por parametros
+      // devolver tamaño de productions de esa categoria 
       return categoriaGuardar.size;
     }
 
@@ -432,18 +475,18 @@ let VideoSystem = (function () {
       if (!(director instanceof Person)) throw new WrongClass("Director", director.name);
 
       // añadir el director si no existe en el sistema
-      if (!(this.#directors.has(director))) {
+      if (!(this.#directors.has(`${director.name}_${director.lastname1}`))) {
         this.addDirector(director);
       }
 
-      // directorMap
-      const directorMap = this.#directors.get(director);
+      // Set dentro del Map  #directors
+      const directorMap = this.#directors.get(`${director.name}_${director.lastname1}`).productions;
 
       // recorrer productions
       for (const p of productions) {
         // comprobar entrada
         if ((p === null) || (p === undefined)) throw new EmptyValueException("productions");
-        if (!(p instanceof Production)) throw new WrongClass("Production", p.name);
+        if (!(p instanceof Production)) throw new WrongClass("Production", p.title);
 
         // si no existe la productions se añade al sistema
         if (!(this.#productions.has(p.title))) {
@@ -451,6 +494,7 @@ let VideoSystem = (function () {
         }
 
         // asignar la productions al director
+        // this.#directors.get(`${director.name}_${director.lastname1}`).productions.add(p);
         directorMap.add(p);
       }
       // devolver el tamaño
@@ -463,10 +507,10 @@ let VideoSystem = (function () {
       if ((director === null) || (director === undefined)) throw new EmptyValueException("director");
       if (!(director instanceof Person)) throw new WrongClass("Director", director.name);
       // si no existe ese director lanza excepción
-      if (!(this.#directors.has(director))) throw new ObjetoNoExiste(director.name);
+      if (!(this.#directors.has(`${director.name}_${director.lastname1}`))) throw new ObjetoNoExiste(director.name);
 
       // Obtener director
-      const directorMap = this.#directors.get(director);
+      const directorMap = this.#directors.get(`${director.name}_${director.lastname1}`).productions;
 
       // recorrer productions
       for (const pro of productions) {
@@ -489,12 +533,12 @@ let VideoSystem = (function () {
       if (!(actor instanceof Person)) throw new WrongClass("Actor", actor.name);
 
       // si no existe el actor se crea
-      if (!(this.#actors.has(actor))) {
+      if (!(this.#actors.has(`${actor.name}_${actor.lastname1}`))) {
         this.addActor(actor);
       }
 
       // actor Map
-      const actorMap = this.#actors.get(actor);
+      const actorSet = this.#actors.get(`${actor.name}_${actor.lastname1}`).productions;
 
       // recorrer productions
       for (const pro of productions) {
@@ -508,10 +552,11 @@ let VideoSystem = (function () {
         }
 
         // asignar esa productions al actor
-        actorMap.add(pro);
+        // this.#actors.get(actor).add(pro);
+        actorSet.add(pro);
       }
       // devolver número de productions del actor
-      return actorMap.size;
+      return actorSet.size;
 
     }
 
@@ -521,10 +566,10 @@ let VideoSystem = (function () {
       if ((actor === null) || (actor === undefined)) throw new EmptyValueException("actor");
       if (!(actor instanceof Person)) throw new WrongClass("Actor", actor.name);
       // si no existe el actor lanza excepción
-      if (!(this.#actors.has(actor))) throw new ObjetoNoExiste(actor.name);
+      if (!(this.#actors.has(`${actor.name}_${actor.lastname1}`))) throw new ObjetoNoExiste(actor.name);
 
-      // actor Map
-      const actorMap = this.#actors.get(actor);
+      // El Set de las producciones del Map actors
+      const actorSet = this.#actors.get(`${actor.name}_${actor.lastname1}`).productions;
 
       // recorrer productions
       for (const pro of productions) {
@@ -533,52 +578,59 @@ let VideoSystem = (function () {
         if (!(pro instanceof Production)) throw new WrongClass("Productions", pro.name);
 
         // borrar productions del actor 
-        actorMap.delete(pro);
+        actorSet.delete(pro);
 
       }
       // devuelve tamaño de productions del actor
-      return actorMap.size;
+      return actorSet.size;
     }
 
     // generador getCast()
-    *getCast(production) {
+    // obtener los actores de una producción
+    * getCast(production) {
       // comprobar entrada
       if ((production === null) || (production === undefined)) throw new EmptyValueException("production");
-      if (!(production instanceof Production)) throw new WrongClass("Production", production.name);
+      if (!(production instanceof Production)) throw new WrongClass("Production", production.title);
 
       // recorrer el Map de actores
-      for (const [actor, setProduction] of this.#actors) {
+      for (const actor of this.#actors.values()) {
         // si en el set del actor está esa produccion devolver el actor
-        if (setProduction.has(production)) {
-          yield actor;
+        if (actor.productions.has(production)) {
+          yield actor.obj; // devuelve el actor
         }
       }
     }
 
     // getProductionsDirector
-    *getProductionsDirector(director) {
+    // obtener las producciones de un director
+    * getProductionsDirector(director) {
       // comprobar entrada
       if (director === null || director === undefined) throw new EmptyValueException("director");
       if (!(director instanceof Person)) throw new WrongClass("Director", director.name);
 
       // si el director no existe
-      if (!this.#directors.has(director)) throw new ObjetoNoExiste(director.name);
+      if (!this.#directors.has(`${director.name}_${director.lastname1}`)) throw new ObjetoNoExiste(director.name);
 
+      const ProduccionesDirector = this.#directors.get(`${director.name}_${director.lastname1}`).productions;
       // recorrer el Map
-      for (const pro of this.#directors.get(director)) {
-        yield pro;
+      for (const production of ProduccionesDirector) {
+        // devolver production del director
+        yield production;
       }
 
     }
 
     // getProductionsActor
-    *getProductionsActor(actor) {
+    // obtener las produccion de un actor
+    * getProductionsActor(actor) {
       // comprobar datos
       if (!actor) throw new EmptyValueException("actor");
       if (!(actor instanceof Person)) throw new WrongClass("Actor", actor.name);
-      if (!this.#actors.has(actor)) throw new ObjetoNoExiste(actor.name);
+      if (!this.#actors.has(`${actor.name}_${actor.lastname1}`)) throw new ObjetoNoExiste(actor.name);
 
-      for (const pro of this.#actors.get(actor)) {
+      const ProduccionesActor = this.#actors.get(`${actor.name}_${actor.lastname1}`).productions;
+      for (const pro of ProduccionesActor) {
+        // devolver produccion del actor
         yield pro;
       }
 
@@ -586,13 +638,15 @@ let VideoSystem = (function () {
 
 
     // getProductionsCategory
-    *getProductionsCategory(category) {
+    * getProductionsCategory(category) {
       // comprobar la entrada de datos
       if (!category) throw new EmptyValueException("category");
       if (!(category instanceof Category)) throw new WrongClass("Category", category.name);
-      if (!this.#categories.has(category)) throw new CategoryNoRegistrada(category.name);
+      if (!this.#categories.has(category.name)) throw new CategoryNoRegistrada(category.name);
 
-      for (const pro of this.#categories.get(category)) yield pro;
+      const ProduccionesCategoria = this.#categories.get(category.name).productions;
+      // devolver producciones de categoria
+      for (const pro of ProduccionesCategoria) yield pro;
 
     }
 
@@ -605,31 +659,146 @@ let VideoSystem = (function () {
 
       // comprobar si existe
       // ver actores
-      for (const actor of this.#actors.keys()) {
+      for (const actor of this.#actors.values()) {
         if (
-          actor.name === name &&
-          actor.lastname1 === lastname1 &&
-          actor.born.getTime() === new Date(born).getTime()
+          actor.obj.name === name &&
+          actor.obj.lastname1 === lastname1 &&
+          actor.obj.born.getTime() === new Date(born).getTime()
         ) {
-          return actor; // Retorna actor que ya habia sido creado antes
+          return actor.obj; // Retorna actor que ya habia sido creado antes
         }
       }
 
       // ver  directores
-      for (const director of this.#directors.keys()) {
+      for (const director of this.#directors.values()) {
         if (
-          director.name === name &&
-          director.lastname1 === lastname1 &&
-          director.born.getTime() === new Date(born).getTime()
+          director.obj.name === name &&
+          director.obj.lastname1 === lastname1 &&
+          director.obj.born.getTime() === new Date(born).getTime()
         ) {
-          return director; // Retorna director existente
+          return director.obj; // Retorna director existente
         }
       }
 
-      // si no existe, pues crear nueva Person
+      // si no existe, pues crear nueva Person, no añadirlo al Manager
       return new Person(name, lastname1, lastname2, born, picture);
     }
 
+    /**
+     * createProduction
+     */
+    createProduction(
+      title,
+      nationality = "Sin Nacionalidad",
+      publication,
+      synopsis = "Sin synopsis",
+      image = "Sin imagen",
+      // Movie o Serie
+      resources = [],
+      locations = [],
+      seasons = 0
+    ) {
+      // comprobar entrada
+      if (!title || !publication) throw new EmptyValueException("title");
+
+      // comprobar si existe
+      const SetProducciones = this.#productions.values();
+      for (const produccion of SetProducciones) {
+        if (
+          produccion.title === title &&
+          produccion.nationality === nationality &&
+          produccion.publication.getTime() === new Date(publication).getTime()
+        ) {
+          // existe ya en el Map
+          return produccion;
+        }
+      }
+      // si no existe pues crea la produccion y la devuelve
+
+      //  si no tiene capitulos es una Movie
+      if (seasons === 0) return new Movie(title, nationality, publication, synopsis, image, resources, locations);
+      //  si tiene capitulos es una Serie
+      return new Serie(title, nationality, publication, synopsis, image, resources, locations, seasons);
+    }
+
+    /**
+     * createUser
+     */
+    createUser(username, email, password) {
+      // comprobar entrada
+      if (!username || !email || !password) throw new EmptyValueException("");
+
+      // comprobar si existe el User
+      const setUsers = this.#users.values();
+      for (const user of setUsers) {
+        if (
+          user.username === username &&
+          user.email === email &&
+          user.password === password
+        ) {
+          // si ya existe en el Map
+          return user;
+        }
+      }
+      // no existe en el Map
+      return new User(username, email, password);
+    }
+
+    /**
+     * 
+     */
+    createCategory(name, description = "") {
+      // comprobar entrada
+      if (!name) throw new EmptyValueException("name");
+
+      // comprobar si existe
+      const SetCategory = this.#categories.values();
+      for (const cat of SetCategory) {
+        if (
+          cat.obj.name === name &&
+          cat.obj.description === description
+        ) {
+          // si existe
+          return cat.obj;
+        }
+      }
+      // si no existe
+      return new Category(name, description);
+
+    }
+
+    /**
+     * findProductions
+     */
+    * findProductions(filter = () => true, sort = null) {
+      // convertir a Array
+      let result = [...this.#productions.values()].filter(filter);
+      //  ordenar si existe sort
+      if (sort) {
+        result.sort(sort);
+      }
+      // devolver las producciones
+      for (const p of result) yield p;
+    }
+
+    /**
+     * filterProductionsInCategory
+     */
+    * filterProductionsInCategory(category, filter = () => true, sort = null) {
+      // validar datos
+      if (!category) throw new EmptyValueException("category");
+      if (!(category instanceof Category)) throw new WrongClass("Category", category.name);
+      if (!this.#categories.has(category.name)) throw new CategoryNoRegistrada(category.name);
+
+      // convertir a Array
+      let result = [...this.#categories.get(category.name).productions].filter(filter);
+      // ordenar si existe
+      if (sort) {
+        result.sort(sort);
+      }
+      // devolver uno por uno las producciones
+      for (const p of result) yield p;
+    }
   }
 
   // Estructura SingleTon
@@ -637,8 +806,6 @@ let VideoSystem = (function () {
     const video = new VideoSystem();
     // crear categoria por defecto
     video.addCategory(categoryDefault);
-    // congelar para evitar que se pueda modificar
-    Object.freeze(video);
     return video;
   }
 
