@@ -50,6 +50,12 @@ let VideoSystem = (function () {
     // Value: objeto literal {obj: d, productions: new Set(production1, etc)
     #directors = new Map();
 
+    // Mapas para flyweight Factory
+    #personShared = new Map();
+    #productionShared = new Map();
+    #userShared = new Map();
+    #categoryShared = new Map();
+
     constructor() {
       // si no se usa new
       if (!new.target) throw new InvalidAccessConstructorException();
@@ -650,6 +656,9 @@ let VideoSystem = (function () {
 
     }
 
+    // FLYWEIGHT FACTORY (a parte del sistema tiene su propia base de datos)
+
+
     // createPerson
     createPerson(name, lastname1, lastname2 = "", born, picture = "") {
       // comprobar entrada
@@ -657,31 +666,16 @@ let VideoSystem = (function () {
       if (!lastname1) throw new EmptyValueException("lastname1");
       if (!born) throw new EmptyValueException("born");
 
-      // comprobar si existe
-      // ver actores
-      for (const actor of this.#actors.values()) {
-        if (
-          actor.obj.name === name &&
-          actor.obj.lastname1 === lastname1 &&
-          actor.obj.born.getTime() === new Date(born).getTime()
-        ) {
-          return actor.obj; // Retorna actor que ya habia sido creado antes
-        }
+      // clave para guardar y buscar
+      const clave = `${name}_${lastname1}_${new Date(born).getTime()}`;
+
+      // comprobar si no existe la guarda en el pool
+      if (!this.#personShared.has(clave)) {
+        this.#personShared.set(clave, new Person(name, lastname1, lastname2, born, picture));
       }
 
-      // ver  directores
-      for (const director of this.#directors.values()) {
-        if (
-          director.obj.name === name &&
-          director.obj.lastname1 === lastname1 &&
-          director.obj.born.getTime() === new Date(born).getTime()
-        ) {
-          return director.obj; // Retorna director existente
-        }
-      }
-
-      // si no existe, pues crear nueva Person, no añadirlo al Manager
-      return new Person(name, lastname1, lastname2, born, picture);
+      // devuelve el objeto
+      return this.#personShared.get(clave);
     }
 
     /**
@@ -701,24 +695,24 @@ let VideoSystem = (function () {
       // comprobar entrada
       if (!title || !publication) throw new EmptyValueException("title");
 
-      // comprobar si existe
-      const SetProducciones = this.#productions.values();
-      for (const produccion of SetProducciones) {
-        if (
-          produccion.title === title &&
-          produccion.nationality === nationality &&
-          produccion.publication.getTime() === new Date(publication).getTime()
-        ) {
-          // existe ya en el Map
-          return produccion;
-        }
-      }
-      // si no existe pues crea la produccion y la devuelve
+      // clave para guardar o buscar
+      const clave = `${title}_${publication}`;
 
-      //  si no tiene capitulos es una Movie
-      if (seasons === 0) return new Movie(title, nationality, publication, synopsis, image, resources, locations);
-      //  si tiene capitulos es una Serie
-      return new Serie(title, nationality, publication, synopsis, image, resources, locations, seasons);
+      // comprobar si existe
+      if (!this.#productionShared.has(clave)) {
+
+        //  si no tiene capitulos es una Movie
+        if (seasons === 0) {
+          this.#productionShared.set(clave, new Movie(title, nationality, publication, synopsis, image, resources, locations));
+        }
+
+        //  si tiene capitulos es una Serie
+        this.#productionShared.set(clave, new Serie(title, nationality, publication, synopsis, image, resources, locations, seasons));
+      }
+
+      // devuelve el objeto
+      return this.#productionShared.get(clave);
+
     }
 
     /**
@@ -728,42 +722,34 @@ let VideoSystem = (function () {
       // comprobar entrada
       if (!username || !email || !password) throw new EmptyValueException("");
 
+      // clave para guardar o buscar
+      const clave = `${username}_${email}_${password}`;
+
       // comprobar si existe el User
-      const setUsers = this.#users.values();
-      for (const user of setUsers) {
-        if (
-          user.username === username &&
-          user.email === email &&
-          user.password === password
-        ) {
-          // si ya existe en el Map
-          return user;
-        }
+      if (!this.#userShared.has(clave)) {
+        this.#userShared.set(clave, new User(username, email, password));
       }
-      // no existe en el Map
-      return new User(username, email, password);
+      // devolver usuario
+      return this.#userShared.get(clave);
     }
 
     /**
-     * 
+     * createCategory()
      */
     createCategory(name, description = "") {
       // comprobar entrada
       if (!name) throw new EmptyValueException("name");
 
+      // clave
+      const clave = name;
+
       // comprobar si existe
-      const SetCategory = this.#categories.values();
-      for (const cat of SetCategory) {
-        if (
-          cat.obj.name === name &&
-          cat.obj.description === description
-        ) {
-          // si existe
-          return cat.obj;
-        }
+      if (!this.#categoryShared.has(clave)) {
+        this.#categoryShared.set(clave, new Category(name, description));
       }
-      // si no existe
-      return new Category(name, description);
+
+      // devolver objeto
+      return this.#categoryShared.get(clave);
 
     }
 

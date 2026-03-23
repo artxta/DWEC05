@@ -61,7 +61,7 @@ const simpson = new Serie(
 
 const futurama = new Serie(
   "Futurama",
-  "EEUU",
+  "SPAIN",
   new Date(1999, 11, 31),
   "Fry se congela y aparece en el futuro",
   "Futurama.jpg",
@@ -72,7 +72,7 @@ const futurama = new Serie(
 
 const scaryMovie = new Movie(
   "Scary Movie",
-  "EEUU",
+  "SPAIN",
   new Date(2000, 0, 1),
   "Una pelicula de miedo y humor",
   "ScaryMovie.jpg",

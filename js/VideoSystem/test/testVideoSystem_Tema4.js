@@ -44,7 +44,7 @@ import {
 } from "./testObjetosPrueba.js";
 
 // función de testeo de VideoSystem
-function testVideoSystem() {
+function testVideoSystem_Tema4() {
   console.log("=> Test VideoSystem <=");
   console.log("");
 
@@ -256,4 +256,4 @@ assignActor(penelope, elCuervo, silentHill, simpson, futurama, scaryMovie);`);
 }
 
 // exportar función de testeo
-export { testVideoSystem };
+export { testVideoSystem_Tema4 };

@@ -13,8 +13,10 @@
 
   <p>Enlace de github</p>
   <a href="https://github.com/artxta/VideoSystem">https://github.com/artxta/VideoSystem</a>
-
-  <script type="module" src="./testVideoSystem.js"></script>
+  <!-- 
+  
+<script type="module" src="./testVideoSystem.js"></script>
+-->
 </body>
 
 </html>
