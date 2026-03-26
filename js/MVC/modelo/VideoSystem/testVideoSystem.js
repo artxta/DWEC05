@@ -13,11 +13,14 @@ import testVideoSystem_Tema5, { } from "./test/testVideoSystem_Tema5.js";
 // ejecutar pruebas
 
 // testPerson();
-// testCategory();
+//  testCategory();
 // testResource();
 // testProduction();
 // testMovie();
 // testSerie();
 // testUser();
-// testVideoSystem_Tema4();
-testVideoSystem_Tema5();
+// testVideoSystem_Tema4(); // estos son los test antiguos
+
+// descomentar esta linea de abajo para el Test
+
+// testVideoSystem_Tema5(); 

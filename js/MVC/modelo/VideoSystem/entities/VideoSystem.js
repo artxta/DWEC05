@@ -660,7 +660,7 @@ let VideoSystem = (function () {
 
 
     // createPerson
-    createPerson(name, lastname1, lastname2 = "", born, picture = "") {
+    createPerson(name, lastname1, born, lastname2 = "", picture = "") {
       // comprobar entrada
       if (!name) throw new EmptyValueException("name");
       if (!lastname1) throw new EmptyValueException("lastname1");
@@ -671,7 +671,7 @@ let VideoSystem = (function () {
 
       // comprobar si no existe la guarda en el pool
       if (!this.#personShared.has(clave)) {
-        this.#personShared.set(clave, new Person(name, lastname1, lastname2, born, picture));
+        this.#personShared.set(clave, new Person(name, lastname1, born, lastname2, picture));
       }
 
       // devuelve el objeto
@@ -683,8 +683,8 @@ let VideoSystem = (function () {
      */
     createProduction(
       title,
-      nationality = "Sin Nacionalidad",
       publication,
+      nationality = "Sin Nacionalidad",
       synopsis = "Sin synopsis",
       image = "Sin imagen",
       // Movie o Serie
@@ -703,11 +703,11 @@ let VideoSystem = (function () {
 
         //  si no tiene capitulos es una Movie
         if (seasons === 0) {
-          this.#productionShared.set(clave, new Movie(title, nationality, publication, synopsis, image, resources, locations));
+          this.#productionShared.set(clave, new Movie(title, publication, nationality, synopsis, image, resources, locations));
         }
 
         //  si tiene capitulos es una Serie
-        this.#productionShared.set(clave, new Serie(title, nationality, publication, synopsis, image, resources, locations, seasons));
+        this.#productionShared.set(clave, new Serie(title, publication, nationality, synopsis, image, resources, locations, seasons));
       }
 
       // devuelve el objeto

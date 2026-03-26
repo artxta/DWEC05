@@ -149,13 +149,13 @@ export default function testVideoSystem_Tema5() {
   // createPerson()
   console.log("\n");
   console.log("-createPerson() si el objeto ya esta creado devuelve el mismo:\n");
-  const person1 = videoM.createPerson("Juan", "Apellido", "", new Date(1991, 1, 1));
-  const person2 = videoM.createPerson("Juan", "Apellido", "", new Date(1991, 1, 1));
-  const person3 = videoM.createPerson("Maria", "Alegria", "", new Date(1992, 1, 1));
+  const person1 = videoM.createPerson("Juan", "Apellido", new Date(1991, 1, 1));
+  const person2 = videoM.createPerson("Juan", "Apellido", new Date(1991, 1, 1));
+  const person3 = videoM.createPerson("Maria", "Alegria", new Date(1992, 1, 1));
 
-  console.log("const p1 = createPerson(\"Juan\",\"Apellido\",\"\",new Date(1991,1,1))");
-  console.log("const p2 = createPerson(\"Juan\",\"Apellido\",\"\",new Date(1991,1,1))");
-  console.log("const p3 = createPerson(\"Maria\",\"Alegria\",\"\",new Date(1992,1,1))");
+  console.log("const p1 = createPerson(\"Juan\",\"Apellido\",new Date(1991,1,1))");
+  console.log("const p2 = createPerson(\"Juan\",\"Apellido\",new Date(1991,1,1))");
+  console.log("const p3 = createPerson(\"Maria\",\"Alegria\",new Date(1992,1,1))");
 
   console.log("p1 === p2: " + `${person1 === person2}` + ": Se esperaba TRUE");
   console.log("p1 === p3: " + `${person1 === person3}` + ": Se esperaba FALSE");
@@ -164,13 +164,13 @@ export default function testVideoSystem_Tema5() {
   console.log("\n");
   console.log("-createProduction() si el objeto ya esta creado devuelve el mismo\n");
 
-  const prod1 = videoM.createProduction("Spiderman 1", "EEUU", new Date(2000, 1, 1), "", "", [], [], 0);
-  const prod2 = videoM.createProduction("Spiderman 1", "EEUU", new Date(2000, 1, 1), "", "", [], [], 0);
-  const prod3 = videoM.createProduction("Batman vs Superman", "EEUU", new Date(2019, 1, 1), "", "", [], [], 0);
+  const prod1 = videoM.createProduction("Spiderman 1", new Date(2000, 1, 1), "EEUU", "", "", [], [], 0);
+  const prod2 = videoM.createProduction("Spiderman 1", new Date(2000, 1, 1), "EEUU", "", "", [], [], 0);
+  const prod3 = videoM.createProduction("Batman vs Superman", new Date(2019, 1, 1), "EEUU", "", "", [], [], 0);
 
-  console.log("const prod1 = createProduction(\"Spiderman 1\", \"EEUU\", new Date(2000, 1, 1), \"\", \"\", [], [], 0);");
-  console.log("const prod2 = createProduction(\"Spiderman 1\", \"EEUU\", new Date(2000, 1, 1), \"\", \"\", [], [], 0);");
-  console.log("const prod3 = createProduction(\"Batman vs Superman\", \"EEUU\", new Date(2019, 1, 1), \"\", \"\", [], [], 0);");
+  console.log("const prod1 = createProduction(\"Spiderman 1\", new Date(2000, 1, 1), \"EEUU\", \"\", \"\", [], [], 0);");
+  console.log("const prod2 = createProduction(\"Spiderman 1\", new Date(2000, 1, 1), \"EEUU\", \"\", \"\", [], [], 0);");
+  console.log("const prod3 = createProduction(\"Batman vs Superman\", new Date(2019, 1, 1), \"EEUU\", \"\", \"\", [], [], 0);");
 
   console.log("prod1 === prod2: " + `${prod1 === prod2}` + ": Se esperaba TRUE");
   console.log("prod1 === prod3: " + `${prod1 === prod3}` + ": Se esperaba FALSE");
@@ -237,20 +237,17 @@ export default function testVideoSystem_Tema5() {
   const cat = videoM.createCategory("Ciencia Ficción"); // categoria
   const produ1 = videoM.createProduction( // produccion
     "Torrente presidente",
-    "SPAIN",
-    new Date(2026, 2, 23), "", "", [], [], 0
+    new Date(2026, 2, 23), "SPAIN", "", "", [], [], 0
   );
 
   const produ2 = videoM.createProduction(
     "Jaula",
-    "SPAIN",
-    new Date(2014, 2, 13), "", "", [], [], 0
+    new Date(2014, 2, 13), "SPAIN", "", "", [], [], 0
   );
 
   const produ3 = videoM.createProduction(
     "Enterrado",
-    "SPAIN",
-    new Date(2010, 1, 1), "", "", [], [], 0
+    new Date(2010, 1, 1), "SPAIN", "", "", [], [], 0
   );
 
   // guardar en el Sistema

@@ -19,8 +19,8 @@ class Production {
 
   constructor(
     title,
-    nationality = "Sin Nacionalidad",
     publication,
+    nationality = "Sin Nacionalidad",
     synopsis = "Sin synopsis",
     image = "Sin imagen"
   ) {

@@ -15,7 +15,7 @@ class Person {
   #born;
   #picture;
 
-  constructor(name, lastname1, lastname2 = "", born, picture = "") {
+  constructor(name, lastname1, born, lastname2 = "", picture = "") {
     // comprobar si se llama con new
     if (!new.target) throw new InvalidAccessConstructorException();
 
@@ -33,7 +33,7 @@ class Person {
     this.#born = date;
     this.#picture = picture;
 
-    this.name = "Person";
+    // this.name = "Person";
 
     // name
     Object.defineProperty(this, 'name', {
@@ -66,8 +66,7 @@ class Person {
         return this.#lastname2;
       },
       set(valor) {
-        if (!valor) throw new EmptyValueException("lastname2");
-        this.#lastname2 = valor;
+        this.#lastname2 = valor || "";
       }
     });
 
@@ -91,8 +90,8 @@ class Person {
         return this.#picture;
       },
       set(value) {
-        if (!value) throw new EmptyValueException('picture');
-        this.#picture = value;
+
+        this.#picture = value || "";
       }
     });
 

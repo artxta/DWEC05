@@ -9,9 +9,7 @@ function testPerson() {
   const juanillo = new Person(
     "Juanillo",
     "Garcia",
-    undefined,
-    new Date("1991/12/20"),
-    undefined
+    new Date("1991/12/20")
   );
 
   // comprobar metodo
