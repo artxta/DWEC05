@@ -156,10 +156,10 @@ let VideoSystem = (function () {
         if (!(c instanceof Category)) throw new WrongClass("Category", c.name);
 
         // Flyweight: reutilizar categoría existente si ya está en el Map
-        if (this.#categories.has(c.name)) {
+        if (!this.#categories.has(c.name)) {
 
-          throw new CategoryExist(c.name);
-        } else {
+          //   throw new CategoryExist(c.name);
+          // } else {
           // si no existe la crea
           // se ha cambiado la clave por el nombre de la categoria
           // se ha cambiado el valor por un objeto literal con la categoria y el Set 
@@ -704,10 +704,12 @@ let VideoSystem = (function () {
         //  si no tiene capitulos es una Movie
         if (seasons === 0) {
           this.#productionShared.set(clave, new Movie(title, publication, nationality, synopsis, image, resources, locations));
+        } else {
+
+          //  si tiene capitulos es una Serie
+          this.#productionShared.set(clave, new Serie(title, publication, nationality, synopsis, image, resources, locations, seasons));
         }
 
-        //  si tiene capitulos es una Serie
-        this.#productionShared.set(clave, new Serie(title, publication, nationality, synopsis, image, resources, locations, seasons));
       }
 
       // devuelve el objeto
