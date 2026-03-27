@@ -227,14 +227,16 @@ let VideoSystem = (function () {
         // si no es instancia de User
         if (!(user instanceof User)) throw new WrongClass("User", user);
         // comprobar si existe, no añadir
-        if (this.#users.has(user.username)) throw new ObjetoYaExiste(user.username);
-        // comparar usuarios por email
-        for (const u of this.#users.values()) {
-          if (u.email === user.email) {
-            throw new ObjetoYaExiste(user.email);
+
+        if (this.#users.has(user.username)) {
+          // comparar usuarios por email
+          for (const u of this.#users.values()) {
+            if (u.email === user.email) {
+              console.warn("Usuario ya existe: " + user.username + " no se duplica");
+              return this.#users.size;
+            }
           }
         }
-
 
         // si no , pues añadirlo
         this.#users.set(user.username, user);
@@ -271,8 +273,9 @@ let VideoSystem = (function () {
           const titulo = this.#productions.get(c.title).title;
           const fecha = this.#productions.get(c.title).publication.getTime();
           if ((titulo === c.title) && fecha === c.publication.getTime()) {
-
-            throw new ObjetoYaExiste(c);
+            console.warn("La producción ya existe: " + c.title + " no se duplica");
+            return this.#productions.size;
+            // throw new ObjetoYaExiste(c);
           }
         }
 
@@ -341,7 +344,11 @@ let VideoSystem = (function () {
         // comprobar entrada
         if ((a === null) || (a === undefined)) throw new EmptyValueException("actors");
         if (!(a instanceof Person)) throw new WrongClass("Person", a.name);
-        if (this.#actors.has(`${a.name}_${a.lastname1}`)) throw new ObjetoYaExiste(a.name);
+        if (this.#actors.has(`${a.name}_${a.lastname1}`)) {
+          console.warn("El actor ya existe: " + a.name + " " + a.lastname1 + " no se duplica");
+          return this.#actors.size;
+          // throw new ObjetoYaExiste(a.name);
+        }
 
         // añadir el actor
         this.#actors.set(`${a.name}_${a.lastname1}`, { obj: a, productions: new Set() });
@@ -378,7 +385,11 @@ let VideoSystem = (function () {
         // comprobar entrada
         if ((dir === null) || (dir === undefined)) throw new EmptyValueException("directors");
         if (!(dir instanceof Person)) throw new WrongClass("Person", dir.name);
-        if (this.#directors.has(`${dir.name}_${dir.lastname1}`)) throw new ObjetoYaExiste(dir.name || "no definido");
+        if (this.#directors.has(`${dir.name}_${dir.lastname1}`)) {
+          console.warn("El director ya existe: " + dir.name + " " + dir.lastname1 + " no se duplica");
+          return this.#directors.size;
+          // throw new ObjetoYaExiste(dir.name || "no definido");
+        }
 
         // añade el objeto
         this.#directors.set(`${dir.name}_${dir.lastname1}`, { obj: dir, productions: new Set() });

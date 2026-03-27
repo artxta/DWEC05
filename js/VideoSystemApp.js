@@ -122,10 +122,14 @@ const datos = {
         // Comedia
         {
           // Dos tontos muy tontos
-          title: "Dos Tontos muy Tontos",
-          fecha: new Date(1994, 1, 1),
+          title: "Los Simpsons",
+          fecha: new Date(1989, 1, 1),
           nac: "EEUU",
-          synopsis: "Una pareja de tontos que hacen tonterias",
+          synopsis: "Una familia de dibuos muy divertida",
+          image: "",
+          resources: [],
+          locations: [],
+          seasons: 40,
           actores: [
             // Dos tontos muy tontos
             { name: "Jim", lastN: "Carrey", born: new Date(1962, 0, 17) },
@@ -133,7 +137,7 @@ const datos = {
           ],
           director: [
             // Dos tontos muy tontos
-            { name: "Peter", lastN: "Farrelly", born: new Date(1949, 2, 3) },
+            { name: "Mat", lastN: "Groening", born: new Date(1949, 2, 3) },
           ]
         },
         {
