@@ -11,43 +11,19 @@ class VideoSystemView {
   // metodos
 
   /**
-   * carga de página al inicio
+   * Carga de inicio
    * @param {*} categories 
    * @param {*} directors 
+   * @param {*} actors 
    */
-  init(categories, directors, actors) {
+  init(categories, directors, actors, productions) {
     // mostrar menú
-    this.showMenu(categories, directors, actors);
-    // ver zona central Categorias
-    this.showCategories(categories);
-
-  };
-
-
-
-  // metodos de la vista , bind conectar eventos con handle
-  bindInit(handler) {
-    const inicio = document.getElementById("inicio");
-    // si no encuantra el elemento no crea el evento
-    if (!inicio) {
-      console.warn("bindInit: elemento #inicio no encontrado")
-      return;
-    }
-
-    inicio.addEventListener("click", (event) => {
-      if (event.target.closest("#inicio")) {
-        event.preventDefault();
-        handler();
-      }
-    });
-  }
-
-  showMenu(categories, directors, actors) {
     let html = "";
+    //  borra el contenido del nav
     this.nav.replaceChildren();
 
     html = `
-       <div class="container-fluid">
+      <div class="container-fluid">
 
       <a id="inicio" class="navbar-brand" href="#">
         <img class="navbar-brand"  src="./img/logo.png" alt="Logo" height="40" class="d-inline-block align-text-top">
@@ -117,16 +93,9 @@ class VideoSystemView {
 
     // insertar en el html antes del final
     this.nav.insertAdjacentHTML("beforeend", html);
-
-  }
-
-  /**
-   * dibujar las categorias
-   * @param {*} categories 
-   */
-  showCategories(categories) {
+    // ver zona central Categorias
     // dibujar el menu
-    let html = "";
+    html = "";
 
     // Borrar lo que habia antes 
     this.main.replaceChildren();
@@ -138,8 +107,7 @@ class VideoSystemView {
     <h3 class="mb-2">Categorías:</h3>
     <div class="row justify-content-center">
     `;
-    // limpiar mensajes anteriores
-    console.clear();
+
     console.log("Mostrar Categorias en Vista:");
     for (const categoria of categories) {
       html += `
@@ -155,7 +123,87 @@ class VideoSystemView {
     `;
 
     this.main.insertAdjacentHTML('beforeend', html);
+
+    // generar Producciones aleatorias
+    html = "";
+    html = `
+    <div class="container">
+      <h3 class="mb-2">3 Producciones Aleatorias:</h3>
+      <div class="row justify-content-center">
+    `;
+
+    console.log("Mostrar 3 producciones aleatorias");
+
+    // guarda las producciones aleatorias
+    const randomProductions = Array.from(this.getRandomProductions(productions, 3));
+    for (const produccion of randomProductions) {
+      html += `
+      <div class="col-6 mb-4">
+      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${produccion.synopsis}" >${produccion.title}</a>
+      </div>
+      `;
+      console.log(produccion.title);
+    }
+
+    html += `
+    </div>
+      </div>
+    `;
+
+    this.main.insertAdjacentHTML('beforeend', html);
+
+
+  };
+
+
+  // evento de carga de la página ejecutar el init, para ver datos
+  bindLoad(handler) {
+    window.addEventListener("DOMContentLoaded", handler, { once: true });// ejecutar solo una vez
   }
+
+
+
+  // delegar evento, aun no esta creado el id Inicio, pero el nav si
+  bindInit(handler) {
+    // delegar eventos
+    this.nav.addEventListener("click", (event => {
+      // busca en el nav el id inicio
+      const inicio = event.target.closest("#inicio");
+      if (!inicio) return; // si no existe continuar ejecución
+      handler(); // ejecutar handler
+    }));
+
+
+
+
+  }
+
+  /**
+   * devuelve un set con el número de producciones pasadas por parametro
+   * @param {*} productions 
+   * @param {*} numero 
+   * @returns 
+   */
+  *getRandomProductions(productions, numero) {
+    const array = Array.from(productions);
+    const max = array.length;
+    const set = new Set();
+    //  si se ha introducido un número mal
+    if (max === 0 || numero <= 0) return;
+
+    // mientras el tamaño del set sea menos al tamaño buscado
+    while (set.size < numero) {
+      const aleatorio = Math.floor(Math.random() * max);
+      const p = array[aleatorio];
+      // si es nuevo añadirlo
+      if (!set.has(p)) {
+        set.add(p);
+        yield p;
+      }
+    }
+  }
+
+
 
 }
 

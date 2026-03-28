@@ -8,12 +8,17 @@ class VideoSystemController {
   constructor(model, view) {
     this.#MODEL = model;
     this.#VIEW = view;
-
+    // pintar las categorias al iniciar
+    this.#VIEW.bindLoad(this.handleInit); // despues de cargar datos
+    this.#VIEW.bindInit(this.handleInit);  // al pulsar el inicio o Logo
 
   }
+
   // manejadores handle
+
+  // manejador despues de la carga, inicia el metodo onInit()
   handleInit = () => {
-    this.onInit([...this.#MODEL.categories], [...this.#MODEL.directors], [...this.#MODEL.actors]);
+    this.onInit(this.#MODEL.categories, this.#MODEL.directors, this.#MODEL.actors, this.#MODEL.productions);
   }
 
 
@@ -25,18 +30,19 @@ class VideoSystemController {
   /**
    * crea la Vista inicial
    */
-  onInit = (categories, directors, actors) => {
+  onInit = (categories, directors, actors, productions) => {
     // obtener las categorias
     const cat = [...categories];
     const dir = [...directors];
     const act = [...actors];
-    this.#VIEW.init(cat, dir, act);
-    this.#VIEW.bindInit(this.handleInit);
+    const pro = [...productions]
+    this.#VIEW.init(cat, dir, act, pro);
+
 
   };
 
   /**
-   * Carga los datos iniciales, los carga desde App, justo al inicio
+   * Carga los datos iniciales, los carga desde App, una vez al inicio
    * @param {*} datos 
    */
   onLoad = (datos) => {
@@ -121,9 +127,6 @@ const datos = {
           }
         }
       }
-
-      // pintar las categorias al iniciar
-      this.onInit([...this.#MODEL.categories], [...this.#MODEL.directors], [...this.#MODEL.actors]);
 
 
       // función para test

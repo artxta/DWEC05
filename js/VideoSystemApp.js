@@ -17,7 +17,6 @@ import {
 
 import VideoSystemView from "./MVC/VideoSystemView.js";
 import VideoSystemController from "./MVC/VideoSystemController.js";
-import { accion } from "./MVC/modelo/VideoSystem/test/testObjetosPrueba.js";
 
 // crear instancia App
 const vs = VideoSystem.getInstance();
