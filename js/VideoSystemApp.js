@@ -124,7 +124,7 @@ const datos = {
           title: "Los Simpsons",
           fecha: new Date(1989, 1, 1),
           nac: "EEUU",
-          synopsis: "Una familia de dibuos muy divertida",
+          synopsis: "Una familia de dibujos muy divertida",
           image: "",
           resources: [],
           locations: [],
@@ -144,7 +144,7 @@ const datos = {
           title: "Algo pasa con Mary",
           fecha: new Date(1998, 3, 1),
           nac: "EEUU",
-          synopsis: "Ted desdea a la chica a la que todos desean",
+          synopsis: "Ted desea a la chica que todos desean",
           actores: [
             // Algo pasa con mary
             { name: "Cameron", lastN: "Diaz", born: new Date(1972, 8, 30) },

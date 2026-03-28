@@ -17,6 +17,19 @@ class VideoSystemView {
    * @param {*} actors 
    */
   init(categories, directors, actors, productions) {
+    this.showMenu(categories, directors, actors, directors);
+    this.showCategories(categories, directors, actors, productions);
+
+  };
+
+  /**
+   * muestra el Menu principal
+   * @param {*} categories 
+   * @param {*} directors 
+   * @param {*} actors 
+   * @param {*} productions 
+   */
+  showMenu(categories, directors, actors, productions) {
     // mostrar menú
     let html = "";
     //  borra el contenido del nav
@@ -93,15 +106,24 @@ class VideoSystemView {
 
     // insertar en el html antes del final
     this.nav.insertAdjacentHTML("beforeend", html);
+
+  }
+
+  /**
+   * Muestra las Categorias y las producciones
+   * @param {*} categories 
+   * @param {*} directors 
+   * @param {*} actors 
+   * @param {*} productions 
+   */
+  showCategories(categories, directors, actors, productions) {
     // ver zona central Categorias
-    // dibujar el menu
-    html = "";
 
     // Borrar lo que habia antes 
     this.main.replaceChildren();
 
     // Mostrar categorias en el centro
-    html = "";
+    let html = "";
     html = `
     <div class="container">
     <h3 class="mb-2">Categorías:</h3>
@@ -151,9 +173,7 @@ class VideoSystemView {
     `;
 
     this.main.insertAdjacentHTML('beforeend', html);
-
-
-  };
+  }
 
 
   // evento de carga de la página ejecutar el init, para ver datos
@@ -172,10 +192,6 @@ class VideoSystemView {
       if (!inicio) return; // si no existe continuar ejecución
       handler(); // ejecutar handler
     }));
-
-
-
-
   }
 
   /**
