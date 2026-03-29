@@ -78,7 +78,7 @@ class VideoSystemView {
 
     //  insertar directores en el menú
     for (const director of directors) {
-      html += `<li class="directores"><a class="dropdown-item" href="#">${director.name + " " + director.lastname1}</a></li>`;
+      html += `<li class="director"><a class="dropdown-item" href="#" data-key="${director.name + "_" + director.lastname1}">${director.name + " " + director.lastname1}</a></li>`;
     }
 
     html += `</ul>
@@ -93,7 +93,7 @@ class VideoSystemView {
 
     // Insertar Actores en el menú
     for (const actor of actors) {
-      html += `<li class="actores"><a class="dropdown-item " href="#">${actor.name + " " + actor.lastname1}</a></li>`;
+      html += `<li class="actor"><a class="dropdown-item " href="#" data-key="${actor.name + "_" + actor.lastname1}">${actor.name + " " + actor.lastname1}</a></li>`;
 
     }
 
@@ -356,12 +356,186 @@ class VideoSystemView {
     });
   }
 
-  showFichaActor() {
+  /**
+   * Muestra la ficha del Actor, y de las peliculas que ha participado
+   * @param {*} actor 
+   * @param {*} productions 
+   */
+  showFichaActor(actor, productions) {
+    /*
+     #name;
+      #lastname1;
+      #lastname2;
+      #born;
+      #picture;
+    */
+    let html = "";
+    this.main.replaceChildren();
+
+
+    html += `
+   <div class="card shadow-lg">
+      <div class="row g-0">
+
+        <!-- Foto del actor -->
+        <div class="col-md-4">
+          <img src="https://placehold.co/400x500?text=Foto+Actor" class="img-fluid rounded-start h-100 object-fit-cover"
+            alt="Foto actor">
+        </div>
+
+        <!-- Información -->
+        <div class="col-md-8">
+          <div class="card-body">
+
+            <h2 class="card-title">
+              ${actor.name + " " + actor.lastname1 + " " + actor.lastname2}
+            </h2>
+
+            <p class="card-text">
+              <strong>Fecha de nacimiento: </strong> ${actor.born.toLocaleDateString()}
+            </p>
+
+            <hr>
+
+            <!-- Producciones -->
+            <h4>Producciones: </h4>
+
+            <div class="row">`;
+
+    // mostrar producciones
+
+    for (const pro of productions) {
+      html += `
+               <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Produccion">
+        <div class="card-body">
+          <h6 class="card-title">${pro.title}</h6>
+        </div>
+      </div>
+    </div>
+              `;
+    }
+    html += `</div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+   `;
+
+    this.main.insertAdjacentHTML('beforeend', html);
 
   }
 
-  showFichaDirector() {
+  /**
+   * enlazar el evento para mostrar Ficha Actor
+   * @param {*} handler 
+   */
+  bindShowFichaActor(handler) {
+    this.nav.addEventListener("click", (event) => {
+      // clase actor
+      const actor = event.target.closest(".actor");
+      if (!actor) return; // si no se crea continuar
+      // guardar la key del actor, desde atributo personalizado
+      const keyActor = actor.querySelector("a").dataset.key;
+      // obtener el objeto actor y el array de producciones del actor
+      const datos = handler(keyActor);
+      // ejecutar función
+      console.log("showActor: " + datos.actor);
+      this.showFichaActor(datos.actor, datos.productions);
 
+    });
+  }
+
+  /**
+   * Muestra la ficha del Actor y de las peliculas que ha participado
+   * @param {*} director 
+   * @param {*} productions 
+   */
+  showFichaDirector(director, productions) {
+    let html = "";
+    this.main.replaceChildren();
+
+
+    html += `
+    <div class="card shadow-lg">
+      <div class="row g-0">
+
+        <!-- Si hay foto se pondría aqui -->
+        <div class="col-md-4">
+          <img src="https://placehold.co/400x500?text=Foto+Actor" class="img-fluid rounded-start h-100 object-fit-cover"
+            alt="Foto actor">
+        </div>
+
+        <!-- Los datos  -->
+        <div class="col-md-8">
+          <div class="card-body">
+
+            <h2 class="card-title">
+              ${director.name + " " + director.lastname1 + " " + director.lastname2}
+            </h2>
+
+            <p class="card-text">
+              <strong>Fecha de nacimiento: </strong> ${director.born.toLocaleDateString()}
+            </p>
+
+            <hr>
+
+            <!-- Producciones -->
+            <h4>Producciones</h4>
+
+            <div class="row">`;
+
+    // Mostrar producciones
+    for (const pro of productions) {
+      html += `
+              
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Producción">
+                  <div class="card-body">
+                    <h6 class="card-title">${pro.title}</h6>
+                  </div>
+                </div>
+              </div>
+
+              `;
+    }
+
+
+    html += `</div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    `;
+
+    this.main.insertAdjacentHTML('beforeend', html);
+
+  }
+
+  /**
+   * 
+   * @param {*} handler 
+   */
+  bindShowFichaDirector(handler) {
+    this.nav.addEventListener("click", (event) => {
+      // clase director
+      const director = event.target.closest(".director");
+      if (!director) return; // si no se crea continuar
+      // guardar la key del director, desde atributo personalizado
+      const keyDirector = director.querySelector("a").dataset.key;
+      // obtener el objeto director y el array de producciones del director
+      const datos = handler(keyDirector);
+      // ejecutar función
+      console.log("showDirector: " + datos.director);
+      this.showFichaDirector(datos.director, datos.productions);
+
+    });
   }
 
 

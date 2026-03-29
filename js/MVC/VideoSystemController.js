@@ -13,6 +13,8 @@ class VideoSystemController {
     this.#VIEW.bindInit(this.handleInit);  // al pulsar el inicio o Logo
     this.#VIEW.bindGetProductionsInCategory(this.handleGetProductionsInCategory); // mostrar producciones de una categoria
     this.#VIEW.bindShowFichaProduction(this.handleShowFichaProduction); // mostrar ficha produccion
+    this.#VIEW.bindShowFichaActor(this.handleShowFichaActor); // mostrar la ficha del actor
+    this.#VIEW.bindShowFichaDirector(this.handleShowFichaDirector); // mostrar la ficha del actor
 
   }
 
@@ -22,6 +24,52 @@ class VideoSystemController {
   handleInit = () => {
     this.onInit(this.#MODEL.categories, this.#MODEL.directors, this.#MODEL.actors, this.#MODEL.productions);
   }
+
+  handleShowFichaDirector = (keyDirector) => {
+    try {
+      let director;
+      let productions;
+
+      // buscar el director
+      for (const d of this.#MODEL.directors) {
+        const key = d.name + "_" + d.lastname1;
+        if (key === keyDirector) {
+          director = d;
+        }
+      }
+      productions = Array.from(this.#MODEL.getProductionsDirector(director));
+      return { director, productions }
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * devuelve un objeto tipo {objActor, [producciones]}
+   * @param {*} keyActor 
+   */
+  handleShowFichaActor = (keyActor) => {
+    try {
+      let actor;
+      let productions;
+
+      // buscar el actor
+      for (const a of this.#MODEL.actors) {
+        const key = a.name + "_" + a.lastname1;
+        if (key === keyActor) {
+          actor = a;
+        }
+      }
+
+      productions = Array.from(this.#MODEL.getProductionsActor(actor));
+
+      return { actor, productions };
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
 
   /**
    * del titulo de una producción devuelve un objeto literal con 
@@ -57,6 +105,8 @@ class VideoSystemController {
       console.error(e);
     }
   }
+
+
 
   /**
    * obtener las producciones de una categoria
