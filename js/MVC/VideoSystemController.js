@@ -11,6 +11,8 @@ class VideoSystemController {
     // pintar las categorias al iniciar
     this.#VIEW.bindLoad(this.handleInit); // despues de cargar datos
     this.#VIEW.bindInit(this.handleInit);  // al pulsar el inicio o Logo
+    this.#VIEW.bindGetProductionsInCategory(this.handleGetProductionsInCategory); // mostrar producciones de una categoria
+    this.#VIEW.bindShowFichaProduction(this.handleShowFichaProduction); // mostrar ficha produccion
 
   }
 
@@ -21,10 +23,56 @@ class VideoSystemController {
     this.onInit(this.#MODEL.categories, this.#MODEL.directors, this.#MODEL.actors, this.#MODEL.productions);
   }
 
+  /**
+   * del titulo de una producción devuelve un objeto literal con 
+   * obj produccion,
+   * array actores,
+   * array directores
+   */
+  handleShowFichaProduction = (nombreProduction) => {
+    try {
 
+      // buscar el objeto entre las producciones
+      let produccion;
+      let actores = [];
+      let directores = [];
+      for (const pro of this.#MODEL.productions) {
+        if (pro.title === nombreProduction) {
+          produccion = pro;
+        }
+      }
+      // actores
+      actores = this.#MODEL.getCast(produccion);
+      // directores no hay metodos para devolver directamente el director
+      for (const dir of this.#MODEL.directors) {
+        for (const pro of this.#MODEL.getProductionsDirector(dir)) {
+          // añadir director
+          if (pro.title === nombreProduction) directores.push(dir);
+        }
+      }
+      // devolver objeto
+      return { produccion, actores, directores };
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * obtener las producciones de una categoria
+   */
+  handleGetProductionsInCategory = (nombreCategoria) => {
+    // buscar la categoria con ese nombre
+    for (const cat of this.#MODEL.categories) {
+      if (cat.name === nombreCategoria) {
+        // si lo ha encontrado devuelve las producciones
+        return this.#MODEL.getProductionsCategory(cat);
+      }
+    }
+    // si no lo ha encontrado devuelve un array vacio
+    return [];
+  }
   // metodos
-
-
 
 
   /**
