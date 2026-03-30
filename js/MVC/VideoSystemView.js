@@ -170,8 +170,8 @@ class VideoSystemView {
     const randomProductions = Array.from(this.getRandomProductions(productions, 3));
     for (const produccion of randomProductions) {
       html += `
-      <div class="col-6 mb-4">
-      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${produccion.synopsis}" >${produccion.title}</a>
+      <div class="col-6 mb-4 produccion" data-key="${produccion.title}">
+      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${produccion.synopsis}">${produccion.title}</a>
       </div>
       `;
       console.log(produccion.title);
@@ -206,8 +206,8 @@ class VideoSystemView {
     console.log("Mostrar Producciones de la Categoria:");
     for (const pro of productions) {
       html += `
-      <div class="col-6 mb-4 produccion">
-      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${pro.synopsis}" >${pro.title}</a>
+      <div class="col-6 mb-4 produccion" data-key="${pro.title}">
+      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${pro.synopsis}">${pro.title}</a>
       </div>
       `;
       console.log(pro.title);
@@ -306,8 +306,10 @@ class VideoSystemView {
 
     // mostrar actores
     for (const actor of actors) {
-      html += `<div class="col-md-4 text-center mb-3">
-                <p class="mb-0">${actor.name + " " + actor.lastname1}</p>
+      html += `<div class="col-md-4 text-center mb-3 actor">
+                <a href="#" data-key="${actor.name + "_" + actor.lastname1}" class="text-decoration-none">
+                  <p class="mb-0">${actor.name + " " + actor.lastname1}</p>
+                </a>
               </div>`;
     }
 
@@ -321,8 +323,10 @@ class VideoSystemView {
 
     // mostrar directores
     for (const dir of directors) {
-      html += `<div class="col-md-4 text-center mb-3">
-                <p class="mb-0">${dir.name + " " + dir.lastname1}</p>
+      html += `<div class="col-md-4 text-center mb-3 director">
+                <a href="#" data-key="${dir.name + "_" + dir.lastname1}" class="text-decoration-none">
+                  <p class="mb-0">${dir.name + " " + dir.lastname1}</p>
+                </a>
               </div>`;
     }
 
@@ -347,13 +351,15 @@ class VideoSystemView {
       if (!produccion) return;
 
       // buscar el enlace de la produccion y guardar titulo
-      const nombreProduccion = produccion.querySelector("a").textContent;
+      const nombreProduccion = produccion.dataset.key;
       console.log("Evento añadido a produccion: " + nombreProduccion);
       // añadir handler
       // como necesito el objeto produccion y los actors y directores , lo añado en un objeto
       const datos = handler(nombreProduccion);
       this.showFichaProduction(datos.produccion, datos.actores, datos.directores);
     });
+
+
   }
 
   /**
@@ -406,13 +412,15 @@ class VideoSystemView {
 
     for (const pro of productions) {
       html += `
-               <div class="col-md-4 mb-4">
-      <div class="card h-100">
-        <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Produccion">
-        <div class="card-body">
-          <h6 class="card-title">${pro.title}</h6>
+    <div class="col-md-4 mb-4">
+      <a href="#" class="produccion" data-key="${pro.title}">
+        <div class="card h-100">
+          <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Produccion">
+          <div class="card-body">
+            <h6 class="card-title">${pro.title}</h6>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
               `;
     }
@@ -434,7 +442,22 @@ class VideoSystemView {
    * @param {*} handler 
    */
   bindShowFichaActor(handler) {
+    // escuchar en el nav (donde están los actores en el dropdown)
     this.nav.addEventListener("click", (event) => {
+      // clase actor
+      const actor = event.target.closest(".actor");
+      if (!actor) return; // si no se crea continuar
+      // guardar la key del actor, desde atributo personalizado
+      const keyActor = actor.querySelector("a").dataset.key;
+      // obtener el objeto actor y el array de producciones del actor
+      const datos = handler(keyActor);
+      // ejecutar función
+      console.log("showActor: " + datos.actor);
+      this.showFichaActor(datos.actor, datos.productions);
+
+    });
+    // escuchar también en el main 
+    this.main.addEventListener("click", (event) => {
       // clase actor
       const actor = event.target.closest(".actor");
       if (!actor) return; // si no se crea continuar
@@ -465,8 +488,8 @@ class VideoSystemView {
 
         <!-- Si hay foto se pondría aqui -->
         <div class="col-md-4">
-          <img src="https://placehold.co/400x500?text=Foto+Actor" class="img-fluid rounded-start h-100 object-fit-cover"
-            alt="Foto actor">
+          <img src="https://placehold.co/400x500?text=Foto+Director" class="img-fluid rounded-start h-100 object-fit-cover"
+            alt="Foto director">
         </div>
 
         <!-- Los datos  -->
@@ -493,12 +516,14 @@ class VideoSystemView {
       html += `
               
               <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                  <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Producción">
-                  <div class="card-body">
-                    <h6 class="card-title">${pro.title}</h6>
+                <a href="#" class="produccion" data-key="${pro.title}">
+                  <div class="card h-100">
+                    <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Producción">
+                    <div class="card-body">
+                      <h6 class="card-title">${pro.title}</h6>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
 
               `;
@@ -523,7 +548,22 @@ class VideoSystemView {
    * @param {*} handler 
    */
   bindShowFichaDirector(handler) {
+    // escuchar en el nav
     this.nav.addEventListener("click", (event) => {
+      // clase director
+      const director = event.target.closest(".director");
+      if (!director) return; // si no se crea continuar
+      // guardar la key del director, desde atributo personalizado
+      const keyDirector = director.querySelector("a").dataset.key;
+      // obtener el objeto director y el array de producciones del director
+      const datos = handler(keyDirector);
+      // ejecutar función
+      console.log("showDirector: " + datos.director);
+      this.showFichaDirector(datos.director, datos.productions);
+
+    });
+    // escuchar también en el main 
+    this.main.addEventListener("click", (event) => {
       // clase director
       const director = event.target.closest(".director");
       if (!director) return; // si no se crea continuar

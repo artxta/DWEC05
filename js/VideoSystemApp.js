@@ -110,6 +110,22 @@ const datos = {
             { name: "Tim", lastN: "Burton", born: new Date(1958, 8, 25) },
           ]
         },
+        {
+          // La novia Cadaver
+          title: "La novia Cadaver",
+          fecha: new Date(2005, 23, 10),
+          nac: "EEUU",
+          synopsis: "Cuenta la historia de un muchacho virtuoso e inteligente llamado Victor Van Dort",
+          actores: [
+            // La novia Cadaver
+            { name: "John", lastN: "Depp", born: new Date(1963, 9, 5) },
+            { name: "Helena", lastN: "Bonham", born: new Date(1966, 4, 26) },
+          ],
+          director: [
+            // La novia cadaver
+            { name: "Tim", lastN: "Burton", born: new Date(1958, 8, 25) },
+          ]
+        },
 
       ]
     },
@@ -210,6 +226,20 @@ const datos = {
             { name: "Taylor", lastN: "Hackford", born: new Date(1939, 2, 2) },
           ]
 
+        },
+        {
+          // John Wick
+          title: "John Wick",
+          fecha: new Date(2014, 1, 1),
+          nac: "EEUU",
+          synopsis: "John Wick Era un huérfano que fue acogido por el sindicato del crimen Ruska Roma, donde fue criado como un asesino, y finalmente se convirtió en el principal ejecutor de la mafia rusa,",
+          actores: [
+            { name: "Keanu", lastN: "Reeves", born: new Date(1964, 8, 2) },
+
+          ],
+          director: [
+            { name: "Chad", lastN: "Stahelski", born: new Date(1960, 2, 2) },
+          ]
         },
         {
           // Matrix
