@@ -3,14 +3,14 @@
 // importar MVC
 import {
   VideoSystem,
-  Category,
-  Coordinate,
-  Movie,
-  Person,
-  Production,
-  Resource,
-  Serie,
-  User
+  // Category,
+  // Coordinate,
+  // Movie,
+  // Person,
+  // Production,
+  // Resource,
+  // Serie,
+  // User
 
 } from "./MVC/modelo/VideoSystem/entities/VideoSystem.js";
 
@@ -235,6 +235,7 @@ const datos = {
           synopsis: "John Wick Era un huérfano que fue acogido por el sindicato del crimen Ruska Roma, donde fue criado como un asesino, y finalmente se convirtió en el principal ejecutor de la mafia rusa,",
           actores: [
             { name: "Keanu", lastN: "Reeves", born: new Date(1964, 8, 2) },
+            { name: "Brendan", lastN: "Fraser", born: new Date(1939, 2, 2) },
 
           ],
           director: [
@@ -290,6 +291,20 @@ const datos = {
             { name: "Paul", lastN: "Verhoeven", born: new Date(1990, 1, 1) },
           ]
         },
+        {
+          // Instinto Basico
+          title: "Instinto Básico",
+          fecha: new Date(1992, 1, 1),
+          nac: "EEUU",
+          synopsis: "Al comienzo, Johnny Boz, una estrella del rock retirada, está haciendo el amor con una rubia, y ella lo mata, inmovilizándole primero",
+          actores: [
+            { name: "Sharon", lastN: "Stone", born: new Date(1958, 2, 10) },
+            { name: "Michael", lastN: "Douglas", born: new Date(1944, 8, 15) },
+          ],
+          director: [
+            { name: "Paul", lastN: "Verhoeven", born: new Date(1990, 1, 1) },
+          ]
+        },
       ]
     },
   ],
@@ -322,10 +337,6 @@ const datos = {
 // Carga de datos inicial
 
 VideoSystemApp.onLoad(datos);
-
-
-
-
 
 // exportar class
 export default VideoSystemApp;

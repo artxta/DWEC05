@@ -234,6 +234,7 @@ class VideoSystemView {
       if (!cat) {// si no existe continuar la ejecución
         return;
       }
+      event.preventDefault();
       // obtener el nombre de la categoria desde el enlace "a"
       const nombreCat = cat.querySelector("a").textContent;
       console.log("evento añadido a categoria: " + nombreCat);
@@ -249,6 +250,7 @@ class VideoSystemView {
 
         return;
       }
+      event.preventDefault();
       // obtener el nombre de la categoria desde el enlace "a"
       const nombreCat = cat.querySelector("a").textContent;
       console.log("evento añadido a categoria: " + nombreCat);
@@ -258,7 +260,14 @@ class VideoSystemView {
     });
   }
 
-  showFichaProduction(production, actors, directors) {
+  /**
+   * 
+   * @param {*} production 
+   * @param {*} actors 
+   * @param {*} directors 
+   * @param {*} isVentana si es false muestra botón para abrir en nueva ventana
+   */
+  showFichaProduction(production, actors, directors, isVentana = false) {
     // ver ficha produccion
     // ver todos los campos de la produccion y los actores y directores que intervienen en la producción
     // #title;
@@ -267,16 +276,25 @@ class VideoSystemView {
     // #synopsis;
     // #image;
 
+
     // Borrar lo que habia antes 
-    this.main.replaceChildren();
+    if (!isVentana) this.main.replaceChildren();
 
     // Mostrar producciones en el centro
     let html = "";
     html = `
      <div class="card shadow-lg">
-      <div class="row g-0">
+      <div class="row g-0">`;
 
-        <div class="col-md-4">
+    // botón para abrir en nueva ventana, se envia directamente, la produccion, actores, y directores 
+    if (!isVentana) {
+      html += `<button class="btn btn-outline-success mb-3 newVentana"
+          data-production="${production}" data-actors="${actors}" data-directors="${directors}"
+        >Mostrar en nueva ventana</button>`;
+
+    }
+
+    html += `<div class="col-md-4">
           <img src="https://placehold.co/400x600/grey/white?text=Foto+de+la+Pelicula"
             class="img-fluid rounded-start h-100 object-fit-cover" alt="Imagen producción">
         </div>
@@ -301,7 +319,7 @@ class VideoSystemView {
             <hr>
 
             <!-- Actores -->
-            <h4>Actores</h4>
+            <h4>Actores:</h4>
             <div class="row">`;
 
     // mostrar actores
@@ -318,7 +336,7 @@ class VideoSystemView {
             <hr>
 
             <!-- Directores -->
-            <h4>Directores</h4>
+            <h4>Directores:</h4>
             <div class="row">`;
 
     // mostrar directores
@@ -339,8 +357,12 @@ class VideoSystemView {
     </div>
     `;
 
-
-    this.main.insertAdjacentHTML('beforeend', html);
+    // si se utiliza para mostrar en la pagina principal dibuja la ficha allí, sino, devuelve el html para la nueva ventana
+    if (!isVentana) {
+      this.main.insertAdjacentHTML('beforeend', html);
+    } else {
+      return html;
+    }
   }
 
   // enlace para el evento que muestra la ficha de la pelicula
@@ -349,6 +371,7 @@ class VideoSystemView {
     this.main.addEventListener("click", (event) => {
       const produccion = event.target.closest(".produccion");
       if (!produccion) return;
+      event.preventDefault();
 
       // buscar el enlace de la produccion y guardar titulo
       const nombreProduccion = produccion.dataset.key;
@@ -357,6 +380,16 @@ class VideoSystemView {
       // como necesito el objeto produccion y los actors y directores , lo añado en un objeto
       const datos = handler(nombreProduccion);
       this.showFichaProduction(datos.produccion, datos.actores, datos.directores);
+
+      // añadir evento del botón nueva ventana
+      const boton = this.main.querySelector(".newVentana");
+      if (boton) {
+        boton.addEventListener("click", (evento) => {
+          event.preventDefault();
+          // mostrar en nueva ventana el html de la ficha
+          this.showMyWindow(this.showFichaProduction(datos.produccion, datos.actores, datos.directores, true));
+        });
+      }
     });
 
 
@@ -367,7 +400,7 @@ class VideoSystemView {
    * @param {*} actor 
    * @param {*} productions 
    */
-  showFichaActor(actor, productions) {
+  showFichaActor(actor, productions, isVentana = false) {
     /*
      #name;
       #lastname1;
@@ -376,15 +409,23 @@ class VideoSystemView {
       #picture;
     */
     let html = "";
-    this.main.replaceChildren();
+    if (!isVentana) this.main.replaceChildren();
 
 
     html += `
    <div class="card shadow-lg">
-      <div class="row g-0">
+      <div class="row g-0">`;
 
-        <!-- Foto del actor -->
-        <div class="col-md-4">
+    // Botón que mostrar si no es ventana
+    if (!isVentana) {
+      html += `<button class="btn btn-outline-success mb-3 newVentana"
+       data-actor="${actor} data-productions="${productions}">Mostrar en nueva ventana</button>`;
+    }
+
+
+
+    // Foto del actor
+    html += `<div class="col-md-4">
           <img src="https://placehold.co/400x500?text=Foto+Actor" class="img-fluid rounded-start h-100 object-fit-cover"
             alt="Foto actor">
         </div>
@@ -433,7 +474,12 @@ class VideoSystemView {
     </div>
    `;
 
-    this.main.insertAdjacentHTML('beforeend', html);
+    if (!isVentana) {
+
+      this.main.insertAdjacentHTML('beforeend', html);
+    } else {
+      return html;
+    }
 
   }
 
@@ -447,6 +493,7 @@ class VideoSystemView {
       // clase actor
       const actor = event.target.closest(".actor");
       if (!actor) return; // si no se crea continuar
+      event.preventDefault();
       // guardar la key del actor, desde atributo personalizado
       const keyActor = actor.querySelector("a").dataset.key;
       // obtener el objeto actor y el array de producciones del actor
@@ -455,12 +502,15 @@ class VideoSystemView {
       console.log("showActor: " + datos.actor);
       this.showFichaActor(datos.actor, datos.productions);
 
+
+
     });
     // escuchar también en el main 
     this.main.addEventListener("click", (event) => {
       // clase actor
       const actor = event.target.closest(".actor");
       if (!actor) return; // si no se crea continuar
+      event.preventDefault();
       // guardar la key del actor, desde atributo personalizado
       const keyActor = actor.querySelector("a").dataset.key;
       // obtener el objeto actor y el array de producciones del actor
@@ -468,6 +518,16 @@ class VideoSystemView {
       // ejecutar función
       console.log("showActor: " + datos.actor);
       this.showFichaActor(datos.actor, datos.productions);
+
+      // añadir evento del botón nueva ventana
+      const boton = this.main.querySelector(".newVentana");
+      if (boton) {
+        boton.addEventListener("click", (event) => {
+          // mostrar en nueva ventana el html de la ficha
+          event.preventDefault();
+          this.showMyWindow(this.showFichaActor(datos.actor, datos.productions, true));
+        });
+      }
 
     });
   }
@@ -477,17 +537,24 @@ class VideoSystemView {
    * @param {*} director 
    * @param {*} productions 
    */
-  showFichaDirector(director, productions) {
+  showFichaDirector(director, productions, isVentana = false) {
     let html = "";
-    this.main.replaceChildren();
+    if (!isVentana) this.main.replaceChildren();
 
 
     html += `
     <div class="card shadow-lg">
-      <div class="row g-0">
+      <div class="row g-0">`;
 
-        <!-- Si hay foto se pondría aqui -->
-        <div class="col-md-4">
+    //  botón que mostrar solo en la pantalla principal, no en la ventana
+    if (!isVentana) {
+      html += `<button class="btn btn-outline-success mb-3 newVentana"
+     data-director="${director}" data-productions="${productions}"
+    >Mostrar en nueva ventana</button>`;
+    }
+
+    // Si hay foto se pondría aqui 
+    html += `<div class="col-md-4">
           <img src="https://placehold.co/400x500?text=Foto+Director" class="img-fluid rounded-start h-100 object-fit-cover"
             alt="Foto director">
         </div>
@@ -539,7 +606,12 @@ class VideoSystemView {
     </div>
     `;
 
-    this.main.insertAdjacentHTML('beforeend', html);
+    if (!isVentana) {
+
+      this.main.insertAdjacentHTML('beforeend', html);
+    } else {
+      return html;
+    }
 
   }
 
@@ -553,6 +625,7 @@ class VideoSystemView {
       // clase director
       const director = event.target.closest(".director");
       if (!director) return; // si no se crea continuar
+      event.preventDefault();
       // guardar la key del director, desde atributo personalizado
       const keyDirector = director.querySelector("a").dataset.key;
       // obtener el objeto director y el array de producciones del director
@@ -567,6 +640,7 @@ class VideoSystemView {
       // clase director
       const director = event.target.closest(".director");
       if (!director) return; // si no se crea continuar
+      event.preventDefault();
       // guardar la key del director, desde atributo personalizado
       const keyDirector = director.querySelector("a").dataset.key;
       // obtener el objeto director y el array de producciones del director
@@ -575,8 +649,41 @@ class VideoSystemView {
       console.log("showDirector: " + datos.director);
       this.showFichaDirector(datos.director, datos.productions);
 
+      // añadir evento del botón nueva ventana
+      const boton = this.main.querySelector(".newVentana");
+      if (boton) {
+        boton.addEventListener("click", (event) => {
+          event.preventDefault();
+          // mostrar en nueva ventana el html de la ficha
+          this.showMyWindow(this.showFichaDirector(datos.director, datos.productions, true));
+        });
+      }
+
     });
   }
+
+  /**
+   * recibe el html, crea una nueva ventana y la devuelve
+   * @param {*} html 
+   */
+  showMyWindow(html) {
+    // usa la pagina auxPage.html con un esqueleto html vacio
+    let mywindow = window.open("./auxPage.html", "_blank", "width=1000,height=600");
+
+    // Esperar a que la ventana cargue completamente
+    mywindow.addEventListener("load", () => {
+      const main = mywindow.document.getElementById("auxMainID");
+      if (main) {
+        main.insertAdjacentHTML("beforeend", html);
+      }
+    });
+
+    return mywindow;
+  }
+
+
+
+
 
 
   // evento de carga de la página ejecutar el init, para ver datos
@@ -595,6 +702,7 @@ class VideoSystemView {
       if (!inicio) {
         return;
       } // si no existe continuar ejecución
+      event.preventDefault();
       handler(); // ejecutar handler
     });
   }
