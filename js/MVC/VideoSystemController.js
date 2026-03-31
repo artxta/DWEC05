@@ -28,6 +28,10 @@ class VideoSystemController {
 
   // manejador despues de la carga, inicia el metodo onInit()
   handleInit = () => {
+    // añade el estado inicial al history
+    if (!history.state) {
+      this.addHistory({ action: 'init' }); // 
+    }
     this.onInit(this.#MODEL.categories, this.#MODEL.directors, this.#MODEL.actors, this.#MODEL.productions);
   }
 
@@ -40,8 +44,10 @@ class VideoSystemController {
       console.log(">Añadir a history: ");
       console.dir(objetoDatos);
       // evitar que al hacer click se vuelva a hacer pushstate
-      if (history.state?.clave !== objetoDatos.clave) {
-
+      if (
+        history.state?.clave !== objetoDatos.clave ||
+        history.state?.action !== objetoDatos.action
+      ) {
         history.pushState(objetoDatos, null);
       }
     } catch (e) {
@@ -60,37 +66,33 @@ class VideoSystemController {
 
       // variables
       const action = event.state.action;
+
       // buscar y devolver objeto por clave
-      const director = event.state.clave;
-      const actor = event.state.clave;
-      const cat = event.state.clave;
-      const produccion = event.state.clave;
-      // nombre categoria
-      const nombreCategoria = event.state.nombreCategoria;
-      // Arrays
-      const productions = event.state.productions;
-      const actores = event.state.actores;
-      const directores = event.state.directores;
+      const clave = event.state.clave;
+
 
       // acciones
       //  restaurar ver ficha Director
       if (action === 'showFichaDirector') {
         // busca y devuelve el objeto original director y el array productions
         for (const d of this.#MODEL.directors) {
-          if (director === d.name) {
+          if (clave === (d.name + "_" + d.lastname1)) {
+            const productions = Array.from(this.#MODEL.getProductionsDirector(d));
+
             this.#VIEW.showFichaDirector(d, productions);
+            break;
           }
         }
-
         // restaurar ver ficha actor
       } else if (action === 'showFichaActor') {
         // busca y devuelve el objeto original actor y el array productions
         for (const a of this.#MODEL.actors) {
-          if (actor === a.name) {
-            // obtener producciones de ese actor
-            productions = Array.from(this.#MODEL.getProductionsActor(a));
+          if (clave === (a.name + "_" + a.lastname1)) {
+            // obtener producciones de ese actor, no guardar array en history, me da problemass
+            const productions = Array.from(this.#MODEL.getProductionsActor(a));
             // mostrarlo
             this.#VIEW.showFichaActor(a, productions);
+            break;
           }
         }
 
@@ -98,20 +100,33 @@ class VideoSystemController {
       } else if (action === 'getProductionsInCategory') {
         // buscar esa categoria y devolverla desde el popstate
         for (const c of this.#MODEL.categories) {
-          if (cat === c.name) {
+          if (clave === c.name) {
             // devolver la categoria para verla
             console.dir(c);
             this.#VIEW.listProductions(this.#MODEL.getProductionsCategory(c), c.name);
+            break;
           }
         }
 
         // restaurar ver ficha produccion
       } else if (action === 'showFichaProduction') {
+
+        let directores = [];
         // buscar esa produccion y devolverla
         for (const p of this.#MODEL.productions) {
-          if (produccion === p.title) {
-            // devolver la producción para verla
+          // devolver la producción para verla
+          if (clave === p.title) {
+            // directores no hay metodos para devolver directamente el director
+            for (const dir of this.#MODEL.directors) {
+              for (const pro of this.#MODEL.getProductionsDirector(dir)) {
+                // añadir director
+                if (clave === pro.title) directores.push(dir);
+
+              }
+            }
+            const actores = Array.from(this.#MODEL.getCast(p));
             this.#VIEW.showFichaProduction(p, actores, directores);
+            break;
           }
         }
 
@@ -123,6 +138,7 @@ class VideoSystemController {
       // Si no hay estado, volver a la vista inicial
       this.onInit(this.#MODEL.categories, this.#MODEL.directors, this.#MODEL.actors, this.#MODEL.productions);
     }
+
   }
 
   /**
@@ -142,12 +158,13 @@ class VideoSystemController {
           director = d;
         }
       }
+      //  si no hay directores
+      if (!director) return null;
       productions = Array.from(this.#MODEL.getProductionsDirector(director));
       // historial
       this.addHistory({
         action: 'showFichaDirector',
-        clave: director.name,
-        productions
+        clave: director.name + "_" + director.lastname1,
       });
       // devolver datos
       return { director, productions }
@@ -179,7 +196,7 @@ class VideoSystemController {
       // historial
       this.addHistory({
         action: 'showFichaActor',
-        clave: actor.name,
+        clave: actor.name + "_" + actor.lastname1,
 
       });
       // devolver datos
@@ -241,7 +258,6 @@ class VideoSystemController {
       this.addHistory({
         action: 'showFichaProduction',
         clave: produccion.title,
-        actores, directores
       });
       // devolver objeto
       return { produccion, actores, directores };
@@ -264,6 +280,7 @@ class VideoSystemController {
     const dir = [...directors];
     const act = [...actors];
     const pro = [...productions]
+
     this.#VIEW.init(cat, dir, act, pro);
 
 

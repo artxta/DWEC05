@@ -152,7 +152,7 @@ class VideoSystemView {
       <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${categoria.description}" >${categoria.name}</a>
       </div>
       `;
-      console.log(categoria.name);
+      //  console.log(categoria.name);
     }
     html += `
     </div>
@@ -177,7 +177,7 @@ class VideoSystemView {
       <div class="row justify-content-center">
     `;
 
-    console.log("Mostrar 3 producciones aleatorias");
+    console.log("Mostrar 3 producciones aleatorias:");
 
     // guarda las producciones aleatorias
     const randomProductions = Array.from(this.getRandomProductions(productions, 3));
@@ -187,7 +187,7 @@ class VideoSystemView {
       <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${produccion.synopsis}">${produccion.title}</a>
       </div>
       `;
-      console.log(produccion.title);
+      //  console.log(produccion.title);
     }
 
     html += `
@@ -223,7 +223,7 @@ class VideoSystemView {
       <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${pro.synopsis}">${pro.title}</a>
       </div>
       `;
-      console.log(pro.title);
+      // console.log(pro.title);
     }
     html += `
     </div>
@@ -290,9 +290,9 @@ class VideoSystemView {
     // #image;
 
     try {
-      
 
-      
+
+
       // Borrar lo que habia antes 
       if (!isVentana) this.main.replaceChildren();
 
