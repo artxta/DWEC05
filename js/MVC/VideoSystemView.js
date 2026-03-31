@@ -2,6 +2,8 @@
 
 class VideoSystemView {
 
+  // Map para guardar las ventanas abiertas por clave única (p.ej. título de ficha)
+  #ventanasAbiertas = new Map();
 
   constructor() {
     this.nav = document.getElementById("navID");
@@ -38,72 +40,83 @@ class VideoSystemView {
     this.nav.replaceChildren();
 
     html = `
-      <div class="container-fluid">
+<div class="container-fluid">
 
-      <a id="inicio" class="navbar-brand" href="#">
-        <img class="navbar-brand"  src="./img/logo.png" alt="Logo" height="40" class="d-inline-block align-text-top">
-        Inicio
-      </a>
+  <a id="inicio" class="navbar-brand" href="#">
+    <img class="navbar-brand"  src="./img/logo.png" alt="Logo" height="40" class="d-inline-block align-text-top">
+    Inicio
+  </a>
 
-      <!-- Botón hamburguesa (para pantallas pequeñas) -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+  <!-- Botón hamburguesa (para pantallas pequeñas) -->
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
       
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav">`;
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">`;
 
     // Insertar Categorias, Actores, Directores, etc en un dropdown
     html += `
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Categorías
-            </a>
-            <ul class="dropdown-menu">`;
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Categorías
+        </a>
+        <ul class="dropdown-menu">`;
     for (const cat of categories) { // clase categoria
-      html += `<li class="categoria"><a class="dropdown-item category-link" title="${cat.description}" href="#">${cat.name}</a></li>`;
+      html += `
+          <li class="categoria"><a class="dropdown-item category-link" title="${cat.description}" href="#">${cat.name}</a></li>`;
     }
 
 
     html += `
-    </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-              Directores
-            </a>
-            <ul class="dropdown-menu">`;
+        </ul>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+        Directores
+        </a>
+        <ul class="dropdown-menu">`;
 
 
     //  insertar directores en el menú
     for (const director of directors) {
-      html += `<li class="director"><a class="dropdown-item" href="#" data-key="${director.name + "_" + director.lastname1}">${director.name + " " + director.lastname1}</a></li>`;
+      html += `
+          <li class="director"><a class="dropdown-item" href="#" data-key="${director.name + "_" + director.lastname1}">${director.name + " " + director.lastname1}</a></li>`;
     }
 
-    html += `</ul>
-          </li>
+    html += `
+        </ul>
+      </li>
 
           
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-              Actores
-            </a>
-            <ul class="dropdown-menu">`;
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+        Actores
+        </a>
+        <ul class="dropdown-menu">`;
 
     // Insertar Actores en el menú
     for (const actor of actors) {
-      html += `<li class="actor"><a class="dropdown-item " href="#" data-key="${actor.name + "_" + actor.lastname1}">${actor.name + " " + actor.lastname1}</a></li>`;
+      html += `
+          <li class="actor"><a class="dropdown-item " href="#" data-key="${actor.name + "_" + actor.lastname1}">${actor.name + " " + actor.lastname1}</a></li>`;
 
     }
 
-    html += `</ul>
-          </li>
-
+    html += `
         </ul>
-      </div>
+      </li>
 
-    </div>
+    <!-- Boton para Cerrar Todas las Ventanas -->
+    <button id="btnCerrarVentanas" class="btn btn-outline-danger">Cerrar Todas las Ventanas</button>
+    
+    </ul>
+
+
+
+  </div>
+</div>
     `;
 
     // insertar en el html antes del final
@@ -276,93 +289,104 @@ class VideoSystemView {
     // #synopsis;
     // #image;
 
+    try {
+      
 
-    // Borrar lo que habia antes 
-    if (!isVentana) this.main.replaceChildren();
+      
+      // Borrar lo que habia antes 
+      if (!isVentana) this.main.replaceChildren();
 
-    // Mostrar producciones en el centro
-    let html = "";
-    html = `
-     <div class="card shadow-lg">
-      <div class="row g-0">`;
+      // Mostrar producciones en el centro
+      let html = "";
+      html = `
+       <div class="card shadow-lg">
+        <div class="row g-0">`;
 
-    // botón para abrir en nueva ventana, se envia directamente, la produccion, actores, y directores 
-    if (!isVentana) {
-      html += `<button class="btn btn-outline-success mb-3 newVentana"
-          data-production="${production}" data-actors="${actors}" data-directors="${directors}"
-        >Mostrar en nueva ventana</button>`;
+      // botón para abrir en nueva ventana, se envia directamente, la produccion, actores, y directores 
+      if (!isVentana) {
+        html += `<button class="btn btn-outline-success mb-3 newVentana"
+            data-production="${production}" data-actors="${actors}" data-directors="${directors}"
+          >Mostrar en nueva ventana</button>`;
 
-    }
+      }
 
-    html += `<div class="col-md-4">
-          <img src="https://placehold.co/400x600/grey/white?text=Foto+de+la+Pelicula"
-            class="img-fluid rounded-start h-100 object-fit-cover" alt="Imagen producción">
-        </div>
-
-        <div class="col-md-8">
-          <div class="card-body">
-
-            <h2 class="card-title">${production.title}</h2>
-
-            <p class="card-text">
-              <strong>Nacionalidad: </strong>${production.nationality}
-            </p>
-
-            <p class="card-text">
-              <strong>Fecha de publicación: </strong>${production.publication.toLocaleDateString()}
-            </p>
-
-            <p class="card-text">
-              <strong>Sinopsis: </strong>${production.synopsis}
-            </p>
-
-            <hr>
-
-            <!-- Actores -->
-            <h4>Actores:</h4>
-            <div class="row">`;
-
-    // mostrar actores
-    for (const actor of actors) {
-      html += `<div class="col-md-4 text-center mb-3 actor">
-                <a href="#" data-key="${actor.name + "_" + actor.lastname1}" class="text-decoration-none">
-                  <p class="mb-0">${actor.name + " " + actor.lastname1}</p>
-                </a>
-              </div>`;
-    }
-
-    html += `</div>
-
-            <hr>
-
-            <!-- Directores -->
-            <h4>Directores:</h4>
-            <div class="row">`;
-
-    // mostrar directores
-    for (const dir of directors) {
-      html += `<div class="col-md-4 text-center mb-3 director">
-                <a href="#" data-key="${dir.name + "_" + dir.lastname1}" class="text-decoration-none">
-                  <p class="mb-0">${dir.name + " " + dir.lastname1}</p>
-                </a>
-              </div>`;
-    }
-
-    html += `</div>
-
+      html += `<div class="col-md-4">
+            <img src="https://placehold.co/400x600/grey/white?text=Foto+de+la+Pelicula"
+              class="img-fluid rounded-start h-100 object-fit-cover" alt="Imagen producción">
           </div>
+  
+          <div class="col-md-8">
+            <div class="card-body">
+  
+              <h2 class="card-title">${production.title}</h2>
+  
+              <p class="card-text">
+                <strong>Nacionalidad: </strong>${production.nationality}
+              </p>
+  
+              <p class="card-text">
+  
+              <!--  problema con las fechas, pushState las convierte a strings al serializar -->
+                <strong>Fecha de publicación: </strong>${production.publication.toLocaleDateString()}
+              </p>
+  
+              <p class="card-text">
+                <strong>Sinopsis: </strong>${production.synopsis}
+              </p>
+  
+              <hr>
+  
+              <!-- Actores -->
+              <h4>Actores:</h4>
+              <div class="row">`;
+
+      // mostrar actores
+      for (const actor of actors) {
+        html += `<div class="col-md-4 text-center mb-3 actor">
+                  <a href="#" data-key="${actor.name + "_" + actor.lastname1}" class="text-decoration-none">
+                    <p class="mb-0">${actor.name + " " + actor.lastname1}</p>
+                  </a>
+                </div>`;
+      }
+
+      html += `</div>
+  
+              <hr>
+  
+              <!-- Directores -->
+              <h4>Directores:</h4>
+              <div class="row">`;
+
+      // mostrar directores
+      for (const dir of directors) {
+        html += `<div class="col-md-4 text-center mb-3 director">
+                  <a href="#" data-key="${dir.name + "_" + dir.lastname1}" class="text-decoration-none">
+                    <p class="mb-0">${dir.name + " " + dir.lastname1}</p>
+                  </a>
+                </div>`;
+      }
+
+      html += `</div>
+  
+            </div>
+          </div>
+  
         </div>
-
       </div>
-    </div>
-    `;
+      `;
 
-    // si se utiliza para mostrar en la pagina principal dibuja la ficha allí, sino, devuelve el html para la nueva ventana
-    if (!isVentana) {
-      this.main.insertAdjacentHTML('beforeend', html);
-    } else {
-      return html;
+      // si se utiliza para mostrar en la pagina principal dibuja la ficha allí, sino, devuelve el html para la nueva ventana
+      if (!isVentana) {
+        this.main.insertAdjacentHTML('beforeend', html);
+      } else {
+        return html;
+      }
+    } catch (e) {
+      console.error(e);
     }
+
+
+
   }
 
   // enlace para el evento que muestra la ficha de la pelicula
@@ -384,10 +408,10 @@ class VideoSystemView {
       // añadir evento del botón nueva ventana
       const boton = this.main.querySelector(".newVentana");
       if (boton) {
-        boton.addEventListener("click", (evento) => {
+        boton.addEventListener("click", (event) => {
           event.preventDefault();
-          // mostrar en nueva ventana el html de la ficha
-          this.showMyWindow(this.showFichaProduction(datos.produccion, datos.actores, datos.directores, true));
+          // mostrar en nueva ventana el html de la ficha (una sola ventana por título)
+          this.showMyWindow(this.showFichaProduction(datos.produccion, datos.actores, datos.directores, true), datos.produccion.title);
         });
       }
     });
@@ -419,7 +443,7 @@ class VideoSystemView {
     // Botón que mostrar si no es ventana
     if (!isVentana) {
       html += `<button class="btn btn-outline-success mb-3 newVentana"
-       data-actor="${actor} data-productions="${productions}">Mostrar en nueva ventana</button>`;
+       data-actor="${actor}" data-productions="${productions}">Mostrar en nueva ventana</button>`;
     }
 
 
@@ -501,7 +525,15 @@ class VideoSystemView {
       // ejecutar función
       console.log("showActor: " + datos.actor);
       this.showFichaActor(datos.actor, datos.productions);
-
+      // añadir evento del botón nueva ventana
+      const boton = this.main.querySelector(".newVentana");
+      if (boton) {
+        boton.addEventListener("click", (event) => {
+          // mostrar en nueva ventana el html de la ficha
+          event.preventDefault();
+          this.showMyWindow(this.showFichaActor(datos.actor, datos.productions, true), `${datos.actor.name}_${datos.actor.lastname1}`);
+        });
+      }
 
 
     });
@@ -525,7 +557,7 @@ class VideoSystemView {
         boton.addEventListener("click", (event) => {
           // mostrar en nueva ventana el html de la ficha
           event.preventDefault();
-          this.showMyWindow(this.showFichaActor(datos.actor, datos.productions, true));
+          this.showMyWindow(this.showFichaActor(datos.actor, datos.productions, true), `${datos.actor.name}_${datos.actor.lastname1}`);
         });
       }
 
@@ -634,6 +666,16 @@ class VideoSystemView {
       console.log("showDirector: " + datos.director);
       this.showFichaDirector(datos.director, datos.productions);
 
+      // añadir evento del botón nueva ventana
+      const boton = this.main.querySelector(".newVentana");
+      if (boton) {
+        boton.addEventListener("click", (event) => {
+          event.preventDefault();
+          // mostrar en nueva ventana el html de la ficha
+          this.showMyWindow(this.showFichaDirector(datos.director, datos.productions, true), `${datos.director.name}_${datos.director.lastname1}`);
+        });
+      }
+
     });
     // escuchar también en el main 
     this.main.addEventListener("click", (event) => {
@@ -655,7 +697,7 @@ class VideoSystemView {
         boton.addEventListener("click", (event) => {
           event.preventDefault();
           // mostrar en nueva ventana el html de la ficha
-          this.showMyWindow(this.showFichaDirector(datos.director, datos.productions, true));
+          this.showMyWindow(this.showFichaDirector(datos.director, datos.productions, true), `${datos.director.name}_${datos.director.lastname1}`);
         });
       }
 
@@ -666,21 +708,61 @@ class VideoSystemView {
    * recibe el html, crea una nueva ventana y la devuelve
    * @param {*} html 
    */
-  showMyWindow(html) {
+  showMyWindow(html, key = null) {
+    // Si ya existe una ventana para esta clave y sigue abierta, enfocarla.
+    if (key && this.#ventanasAbiertas.has(key)) {
+      const existe = this.#ventanasAbiertas.get(key);
+      if (existe && !existe.closed) {
+        existe.focus();
+        return existe;
+      }
+      // Esa ventana ya se ha abierto, no se puede volver a abrir 
+      this.#ventanasAbiertas.delete(key);
+    }
+
     // usa la pagina auxPage.html con un esqueleto html vacio
-    let mywindow = window.open("./auxPage.html", "_blank", "width=1000,height=600");
+    const mywindow = window.open("./auxPage.html", "_blank", "width=1000,height=600");
+
+    if (!mywindow) {
+      console.warn("No se pudo abrir la ventana: " + key);
+      return null;
+    }
 
     // Esperar a que la ventana cargue completamente
     mywindow.addEventListener("load", () => {
       const main = mywindow.document.getElementById("auxMainID");
       if (main) {
+        // insertar el html de la ficha en la nueva pagina
         main.insertAdjacentHTML("beforeend", html);
+        console.log("Ventana Abierta: " + key);
       }
     });
+
+    // si no se ha abierto antes
+    if (key) {
+      this.#ventanasAbiertas.set(key, mywindow);
+      // si se cierra la ventana borrar la clave
+      mywindow.addEventListener("beforeunload", () => {
+        if (this.#ventanasAbiertas.get(key) === mywindow) {
+          console.log("Ventana cerrada: " + key);
+
+          this.#ventanasAbiertas.delete(key);
+        }
+      });
+    }
 
     return mywindow;
   }
 
+  // Cerrar todas las ventanas
+  closeWindows() {
+    for (const [key, ventana] of this.#ventanasAbiertas.entries()) {
+      if (ventana && !(ventana.closed)) {
+        ventana.close();
+      }
+      this.#ventanasAbiertas.delete(key);
+    }
+  }
 
 
 
@@ -699,12 +781,21 @@ class VideoSystemView {
     this.nav.addEventListener("click", (event) => {
       // busca en el nav el id inicio
       const inicio = event.target.closest("#inicio");
-      if (!inicio) {
-        return;
+      if (inicio) {
+        event.preventDefault();
+        handler(); // ejecutar handler
+        return; // detiene la ejecución y continua, para no seguir evaluando
       } // si no existe continuar ejecución
-      event.preventDefault();
-      handler(); // ejecutar handler
+
+      const btnCerrar = event.target.closest("#btnCerrarVentanas");
+      if (btnCerrar) {
+        event.preventDefault();
+        this.closeWindows(); // cerrar todas las ventanas
+        return;
+      }
     });
+
+    // crear evento para cerrar ventanas
   }
 
   /**
