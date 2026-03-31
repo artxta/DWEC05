@@ -26,6 +26,56 @@ class VideoSystemView {
 
   };
 
+  bindNewWindow(handler) {
+    // crear evento en el main
+    this.main.addEventListener("click", (event) => {
+      // busca el botón para abrir en nueva ventana
+      const boton = event.target.closest(".newVentana");
+      if (!boton) return; // si no existe continuar la ejecución
+      event.preventDefault();
+
+      // guarda el tipo y la clave del boton
+      // se accede a través de dataset, y dataset convierte los nombres con guiones a camelCase.
+      const tipo = boton.dataset.windowType; // data-window-type en camelCase
+      const key = boton.dataset.key;
+      if (!tipo || !key) return; // si no es ninguno de los dos continuar ejecución
+
+      const datos = handler(tipo, key);
+      if (!datos) return;
+
+      // ejecutar nueva ventana según el tipo.
+
+      // ficha produccion
+      if (tipo === "production") {
+        this.showMyWindow(
+          this.showFichaProduction(datos.produccion, datos.actores, datos.directores, true),
+          // para que no se abran dos ventanas iguales
+          datos.popupKey // identificar la ventana abierta
+        );
+        return;
+      }
+
+      // ficha actor
+      if (tipo === "actor") {
+        this.showMyWindow(
+          this.showFichaActor(datos.actor, datos.productions, true),
+          // para que no se abran dos ventanas iguales
+          datos.popupKey // identificar la ventana abierta
+        );
+        return;
+      }
+
+      // ficha director
+      if (tipo === "director") {
+        this.showMyWindow(
+          this.showFichaDirector(datos.director, datos.productions, true),
+          // para que no se abran dos ventanas iguales
+          datos.popupKey // identificar la ventana abierta
+        );
+      }
+    });
+  }
+
   /**
    * muestra el Menu principal
    * @param {*} categories 
@@ -303,9 +353,10 @@ class VideoSystemView {
         <div class="row g-0">`;
 
       // botón para abrir en nueva ventana, se envia directamente, la produccion, actores, y directores 
+      // cambiar los objetos por claves, los objetos me causan problemas en el history
       if (!isVentana) {
         html += `<button class="btn btn-outline-success mb-3 newVentana"
-            data-production="${production}" data-actors="${actors}" data-directors="${directors}"
+            data-window-type="production" data-key="${production.title}"
           >Mostrar en nueva ventana</button>`;
 
       }
@@ -404,16 +455,6 @@ class VideoSystemView {
       // como necesito el objeto produccion y los actors y directores , lo añado en un objeto
       const datos = handler(nombreProduccion);
       this.showFichaProduction(datos.produccion, datos.actores, datos.directores);
-
-      // añadir evento del botón nueva ventana
-      const boton = this.main.querySelector(".newVentana");
-      if (boton) {
-        boton.addEventListener("click", (event) => {
-          event.preventDefault();
-          // mostrar en nueva ventana el html de la ficha (una sola ventana por título)
-          this.showMyWindow(this.showFichaProduction(datos.produccion, datos.actores, datos.directores, true), datos.produccion.title);
-        });
-      }
     });
 
 
@@ -443,7 +484,7 @@ class VideoSystemView {
     // Botón que mostrar si no es ventana
     if (!isVentana) {
       html += `<button class="btn btn-outline-success mb-3 newVentana"
-       data-actor="${actor}" data-productions="${productions}">Mostrar en nueva ventana</button>`;
+       data-window-type="actor" data-key="${actor.name}_${actor.lastname1}">Mostrar en nueva ventana</button>`;
     }
 
 
@@ -525,16 +566,6 @@ class VideoSystemView {
       // ejecutar función
       console.log("showActor: " + datos.actor);
       this.showFichaActor(datos.actor, datos.productions);
-      // añadir evento del botón nueva ventana
-      const boton = this.main.querySelector(".newVentana");
-      if (boton) {
-        boton.addEventListener("click", (event) => {
-          // mostrar en nueva ventana el html de la ficha
-          event.preventDefault();
-          this.showMyWindow(this.showFichaActor(datos.actor, datos.productions, true), `${datos.actor.name}_${datos.actor.lastname1}`);
-        });
-      }
-
 
     });
     // escuchar también en el main 
@@ -550,16 +581,6 @@ class VideoSystemView {
       // ejecutar función
       console.log("showActor: " + datos.actor);
       this.showFichaActor(datos.actor, datos.productions);
-
-      // añadir evento del botón nueva ventana
-      const boton = this.main.querySelector(".newVentana");
-      if (boton) {
-        boton.addEventListener("click", (event) => {
-          // mostrar en nueva ventana el html de la ficha
-          event.preventDefault();
-          this.showMyWindow(this.showFichaActor(datos.actor, datos.productions, true), `${datos.actor.name}_${datos.actor.lastname1}`);
-        });
-      }
 
     });
   }
@@ -581,7 +602,7 @@ class VideoSystemView {
     //  botón que mostrar solo en la pantalla principal, no en la ventana
     if (!isVentana) {
       html += `<button class="btn btn-outline-success mb-3 newVentana"
-     data-director="${director}" data-productions="${productions}"
+     data-window-type="director" data-key="${director.name}_${director.lastname1}"
     >Mostrar en nueva ventana</button>`;
     }
 
@@ -666,16 +687,6 @@ class VideoSystemView {
       console.log("showDirector: " + datos.director);
       this.showFichaDirector(datos.director, datos.productions);
 
-      // añadir evento del botón nueva ventana
-      const boton = this.main.querySelector(".newVentana");
-      if (boton) {
-        boton.addEventListener("click", (event) => {
-          event.preventDefault();
-          // mostrar en nueva ventana el html de la ficha
-          this.showMyWindow(this.showFichaDirector(datos.director, datos.productions, true), `${datos.director.name}_${datos.director.lastname1}`);
-        });
-      }
-
     });
     // escuchar también en el main 
     this.main.addEventListener("click", (event) => {
@@ -690,16 +701,6 @@ class VideoSystemView {
       // ejecutar función
       console.log("showDirector: " + datos.director);
       this.showFichaDirector(datos.director, datos.productions);
-
-      // añadir evento del botón nueva ventana
-      const boton = this.main.querySelector(".newVentana");
-      if (boton) {
-        boton.addEventListener("click", (event) => {
-          event.preventDefault();
-          // mostrar en nueva ventana el html de la ficha
-          this.showMyWindow(this.showFichaDirector(datos.director, datos.productions, true), `${datos.director.name}_${datos.director.lastname1}`);
-        });
-      }
 
     });
   }

@@ -16,6 +16,7 @@ class VideoSystemController {
     this.#VIEW.bindShowFichaActor(this.handleShowFichaActor); // showFichaActor - mostrar la ficha del actor
     this.#VIEW.bindGetProductionsInCategory(this.handleGetProductionsInCategory); // getProductionsInCategory - mostrar producciones de una categoria
     this.#VIEW.bindShowFichaProduction(this.handleShowFichaProduction); // showFichaProduction - mostrar ficha produccion
+    this.#VIEW.bindNewWindow(this.handleOpenInNewWindow); // abrir fichas en nueva ventana , arreglado para history
 
     // añadir evento del historial
     window.addEventListener("popstate", (event) => {
@@ -191,9 +192,9 @@ class VideoSystemController {
           actor = a;
         }
       }
-
+      // convierte las producciones a array
       productions = Array.from(this.#MODEL.getProductionsActor(actor));
-      // historial
+      // historial usa una clave unica para cada actor
       this.addHistory({
         action: 'showFichaActor',
         clave: actor.name + "_" + actor.lastname1,
@@ -265,6 +266,95 @@ class VideoSystemController {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  /**
+   * segun la ficha que se quiera abrie en nueva ventana, devuelve unos datos o otros
+   * @param {*} tipo 
+   * @param {*} key 
+   * @returns 
+   */
+  handleOpenInNewWindow = (tipo, key) => {
+
+    // si la ficha es produccion
+    if (tipo === "production") {
+      let produccion;
+      const actores = [];
+      const directores = [];
+
+      for (const pro of this.#MODEL.productions) {
+        if (pro.title === key) {
+          produccion = pro;
+          break;
+        }
+      }
+
+      if (!produccion) return null;
+      // añade los datos de los actores
+      for (const actor of this.#MODEL.getCast(produccion)) {
+        actores.push(actor);
+      }
+      // añade los datos de los directores
+      for (const dir of this.#MODEL.directors) {
+        for (const pro of this.#MODEL.getProductionsDirector(dir)) {
+          if (pro.title === key) {
+            directores.push(dir);
+          }
+        }
+      }
+      // devuelve los datos para mostrar ficha produccion
+      return {
+        produccion,
+        actores,
+        directores,
+        popupKey: produccion.title,
+      };
+    }
+
+    // si es del tipo actor
+    if (tipo === "actor") {
+      let actor;
+
+      // busca el actor
+      for (const item of this.#MODEL.actors) {
+        if (`${item.name}_${item.lastname1}` === key) {
+          actor = item;
+          break;
+        }
+      }
+
+      if (!actor) return null;
+
+      // devuelve los datos parra mostrar la ficha del actor
+      return {
+        actor,
+        productions: Array.from(this.#MODEL.getProductionsActor(actor)),
+        popupKey: `${actor.name}_${actor.lastname1}`,
+      };
+    }
+
+    // si es del tipo director
+    if (tipo === "director") {
+      let director;
+
+      // busca el director
+      for (const item of this.#MODEL.directors) {
+        if (`${item.name}_${item.lastname1}` === key) {
+          director = item;
+          break;
+        }
+      }
+
+      if (!director) return null;
+      // devuelve los datos para mostrar la ficha del director
+      return {
+        director,
+        productions: Array.from(this.#MODEL.getProductionsDirector(director)),
+        popupKey: `${director.name}_${director.lastname1}`,
+      };
+    }
+
+    return null;
   }
 
 
